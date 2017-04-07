@@ -135,15 +135,6 @@ server <- function(input, output, session) {
                         mutate(y = log(y))
         })
         
-        changepoints_vector <- reactive({
-                req(input$ch_points_param)
-                ch <- input$ch_points_param %>% 
-                        strsplit(",") %>% 
-                        unlist 
-                
-                if(length(ch)==0) NULL
-                else ch
-        })
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -206,9 +197,21 @@ server <- function(input, output, session) {
         })
         
         ## test op -------------------
+        changepoints_vector <- reactive({
+                req(input$ch_points_param)
+                ch <- input$ch_points_param %>% 
+                        strsplit(",") %>% 
+                        unlist 
+                
+                if(length(ch)==0) NULL
+                else ch
+        })
+        
         output$test <- renderPrint(changepoints_vector())
                                    # changepoints_vector()
                                    # prophet_model()[["changepoints"]]
+        
+        
         
         
         ## selected Changepoints ----------------
@@ -218,14 +221,8 @@ server <- function(input, output, session) {
                               value=paste(prophet_model()$changepoints,collapse=", "))
         })
         
-        ## dateinput ---------------------
-        # output$date_in <- renderUI({
-        #         req(input$ch_points_param)
-        #         dateInput("ch_date", "Add changepoints", value = NULL)
-        # })
         
-        
-        # update textArea
+        # update textArea ------------------------
         observeEvent(input$ch_date,{
                 updateTextAreaInput(session,"ch_points_param",
                                     value=c(input$ch_points_param,
