@@ -2,6 +2,7 @@
 library(shiny)
 library(dplyr)
 library(prophet)
+library(ggplot2)
 library(DT)
 library(shinythemes)
 
