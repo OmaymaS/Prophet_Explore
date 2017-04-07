@@ -110,8 +110,10 @@ ui <- fluidPage(
                                                       tabPanel("Prophet Plot Components",
                                                                plotOutput("prophet_comp_plot")),
                                                       tabPanel("Forecast Table",
-                                                               downloadButton('downloadData', 'Download',
-                                                                              style = "width:100%; margin-bottom: 25px;"),
+                                                               downloadButton('downloadData', 'Download Data',
+                                                                              style = "width:20%;
+                                                                              margin-bottom: 25px;
+                                                                              margin-top: 25px;"),
                                                                dataTableOutput("data")))
                           )
                           ),
@@ -200,7 +202,8 @@ server <- function(input, output, session) {
         
         
         output$downloadData <- downloadHandler(
-                filename = function() { paste(input$dataset, '.csv', sep='') },
+                # filename = function() { paste(input$dataset, '.csv', sep='') },
+                filename = "forecast_data.csv",
                 content = function(file) {
                         write.csv(forecast(), file)
                 }
