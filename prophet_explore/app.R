@@ -12,9 +12,9 @@ ui <- fluidPage(
         # Application title
         titlePanel("Prophet Explore"),
         helpText(tags$a(href="https://github.com/OmaymaS/Prophet_Explore","Prophet Explore "),
-                HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
+                 HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
                  tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
-                HTML("; an open source software released by Facebook's Core Data Science team."),
+                 HTML("; an open source software released by Facebook's Core Data Science team."),
                  tags$br(),
                  HTML("To explore: upload your data in the right format, tune the parameters, then press 'Fit Prophet Model and Plot'.")),
         tags$br(),
@@ -22,85 +22,85 @@ ui <- fluidPage(
         # Sidebar -------------------------------------
         fluidPage(theme = shinytheme("flatly"),
                   sidebarPanel(width=3,
-                               
-                               tabsetPanel(tabPanel(HTML("prophet <br> Parameters"),
-                                                    
-                                                    ## prophet() parameters ------------------------------
-                                                    ### paramter: growth
-                                                    h5(tags$b("growth")),
-                                                    
-                                                    helpText("If growth is logistic, the input dataframe must have a column cap that specifies the capacity at each ds.",
-                                                             style = "margin-bottom: 0px;"),
-                                                    
-                                                    radioButtons("growth","",
-                                                                 c('linear','logistic'), inline = TRUE),
-                                                    
-                                                    
-                                                    
-                                                    # ### date input
-                                                    # dateInput("ch_date", "Add changepoints",value=NULL),
-                                                    # 
-                                                    # ### paramter: changepoints
-                                                    # # textInput("changepoints","changepoints",NULL),
-                                                    # 
-                                                    # uiOutput("ch_points"),
-                                                    
-                                                    
-                                                    ### parameter: fit
-                                                    checkboxInput("fit", "fit", value = TRUE),
-                                                    
-                                                    ### parameter: yearly.seasonality
-                                                    checkboxInput("yearly","yearly.seasonality", value = TRUE),
-                                                    
-                                                    ### parameter: weekly.seasonality 
-                                                    checkboxInput("monthly","weekly.seasonality", value = TRUE),
-                                                    ### parameter: n.changepoints
-                                                    numericInput("n.changepoints","n.changepoints", value = 25),
-                                                    
-                                                    ### parameter: seasonality.prior.scale
-                                                    numericInput("seasonality_scale","seasonality.prior.scale", value = 10),
-                                                    
-                                                    ### parameter: changepoint.prior.scale
-                                                    numericInput("changepoint_scale","changepoint.prior.scale", value = 0.05, step = 0.01),
-                                                    
-                                                    ### parameter: holidays.prior.scale
-                                                    numericInput("holidays_scale","holidays.prior.scale", value = 10),
-                                                    
-                                                    ### parameter: mcmc.samples
-                                                    numericInput("mcmc.samples", "mcmc.samples", value = 0),
-                                                    
-                                                    ### parameter: interval.width
-                                                    numericInput("interval.width", "interval.width", value= 0.8, step = 0.1),
-                                                    
-                                                    ### parameter: uncertainty.samples
-                                                    numericInput("uncertainty.samples","uncertainty.samples", value = 1000),
-                                                    
-                                                    
-                                                    ### parameter: holidays
-                                                    h5(tags$b("holidays (optional)")),
-                                                    
-                                                    helpText("Upload a data frame with columns holiday (character) and ds (date type) and optionally columns lower_window and upper_window which specify a range of days around the date to be included as holidays."),
-                                                    
-                                                    fileInput("holidays_file","",
-                                                              accept = c(
-                                                                      "text/csv",
-                                                                      "text/comma-separated-values,text/plain",
-                                                                      ".csv"))
-                                                    
-                               ),
-                               
-                               tabPanel(HTML("predict <br> Parameters"),
-                                        
-                                        ## make_future_dataframe() parameters ------------------
-                                        ### paramater: periods
-                                        numericInput("periods","periods",value=365),
-                                        
-                                        ### parameter: freq
-                                        selectInput("freq","freq",
-                                                    choices = c('day', 'week', 'month', 'quarter','year'))
-                                        ### parameter: include_history
-                                        # checkboxInput("include_history","include_history", value = TRUE)
-                               ))
+                               tabsetPanel(
+                                       tabPanel(HTML("prophet <br> Parameters"),
+                                                
+                                                ## prophet() parameters ------------------------------
+                                                ### paramter: growth
+                                                h5(tags$b("growth")),
+                                                
+                                                helpText("If growth is logistic, the input dataframe must have a column cap that specifies the capacity at each ds.",
+                                                         style = "margin-bottom: 0px;"),
+                                                
+                                                radioButtons("growth","",
+                                                             c('linear','logistic'), inline = TRUE),
+                                                
+                                                
+                                                
+                                                # ### date input
+                                                # dateInput("ch_date", "Add changepoints",value=NULL),
+                                                # 
+                                                # ### paramter: changepoints
+                                                # # textInput("changepoints","changepoints",NULL),
+                                                # 
+                                                # uiOutput("ch_points"),
+                                                
+                                                
+                                                ### parameter: fit
+                                                checkboxInput("fit", "fit", value = TRUE),
+                                                
+                                                ### parameter: yearly.seasonality
+                                                checkboxInput("yearly","yearly.seasonality", value = TRUE),
+                                                
+                                                ### parameter: weekly.seasonality 
+                                                checkboxInput("monthly","weekly.seasonality", value = TRUE),
+                                                ### parameter: n.changepoints
+                                                numericInput("n.changepoints","n.changepoints", value = 25),
+                                                
+                                                ### parameter: seasonality.prior.scale
+                                                numericInput("seasonality_scale","seasonality.prior.scale", value = 10),
+                                                
+                                                ### parameter: changepoint.prior.scale
+                                                numericInput("changepoint_scale","changepoint.prior.scale", value = 0.05, step = 0.01),
+                                                
+                                                ### parameter: holidays.prior.scale
+                                                numericInput("holidays_scale","holidays.prior.scale", value = 10),
+                                                
+                                                ### parameter: mcmc.samples
+                                                numericInput("mcmc.samples", "mcmc.samples", value = 0),
+                                                
+                                                ### parameter: interval.width
+                                                numericInput("interval.width", "interval.width", value= 0.8, step = 0.1),
+                                                
+                                                ### parameter: uncertainty.samples
+                                                numericInput("uncertainty.samples","uncertainty.samples", value = 1000),
+                                                
+                                                
+                                                ### parameter: holidays
+                                                h5(tags$b("holidays (optional)")),
+                                                
+                                                helpText("Upload a data frame with columns holiday (character) and ds (date type) and optionally columns lower_window and upper_window which specify a range of days around the date to be included as holidays."),
+                                                
+                                                fileInput("holidays_file","",
+                                                          accept = c(
+                                                                  "text/csv",
+                                                                  "text/comma-separated-values,text/plain",
+                                                                  ".csv"))
+                                                
+                                       ),
+                                       
+                                       tabPanel(HTML("predict <br> Parameters"),
+                                                
+                                                ## make_future_dataframe() parameters ------------------
+                                                ### paramater: periods
+                                                numericInput("periods","periods",value=365),
+                                                
+                                                ### parameter: freq
+                                                selectInput("freq","freq",
+                                                            choices = c('day', 'week', 'month', 'quarter','year'))
+                                                ### parameter: include_history
+                                                # checkboxInput("include_history","include_history", value = TRUE)
+                                       ))
                                
                   ),
                   
