@@ -11,6 +11,11 @@ ui <- fluidPage(
         
         # Application title
         titlePanel("Prophet Explore"),
+        helpText(HTML("Prophet Explore is a Shiny App that offers an interactive interface to explore the main functions of the "),
+                 tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]."),
+                 tags$br(),
+                 HTML("Upload your data in the right format, tune the parameters, then press 'Fit Prophet Model and Plot'.")),
+        tags$br(),
         
         # Sidebar -------------------------------------
         fluidPage(theme = shinytheme("flatly"),
@@ -67,7 +72,7 @@ ui <- fluidPage(
                                                     
                                                     ### parameter: uncertainty.samples
                                                     numericInput("uncertainty.samples","uncertainty.samples", value = 1000),
-                                                   
+                                                    
                                                     
                                                     ### parameter: holidays
                                                     h5(tags$b("holidays (optional)")),
@@ -116,7 +121,7 @@ ui <- fluidPage(
                           fluidRow(column(width = 6,
                                           conditionalPanel("input.ch_points_param",
                                                            dateInput("ch_date", "Add changepoints", value = NULL))
-                                          # uiOutput("date_in")
+                                          
                           ),
                           
                           column(width = 6,uiOutput("ch_points"))
@@ -128,7 +133,7 @@ ui <- fluidPage(
                                                                plotOutput("ts_plot")),
                                                       tabPanel("Prophet Plot Components",
                                                                plotOutput("prophet_comp_plot")),
-                                                      tabPanel("Forecast Table",
+                                                      tabPanel("Forecast Results",
                                                                downloadButton('downloadData', 'Download Data',
                                                                               style = "width:20%;
                                                                               margin-bottom: 25px;
@@ -139,7 +144,7 @@ ui <- fluidPage(
                           
                           ## test output --------
                           verbatimTextOutput("test")
-    
+                          
                   )
         )
 )
