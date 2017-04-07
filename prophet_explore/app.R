@@ -172,7 +172,7 @@ server <- function(input, output, session) {
                         n.changepoints = input$n.changepoints,
                         yearly.seasonality = input$yearly,
                         weekly.seasonality = input$monthly,
-                        holidays = NULL,
+                        holidays = holidays_upload(),
                         seasonality.prior.scale = input$seasonality_scale,
                         changepoint.prior.scale = input$changepoint_scale,
                         holidays.prior.scale = input$holidays_scale,
@@ -228,7 +228,7 @@ server <- function(input, output, session) {
         
         ## test op -------------------
         output$test <- renderPrint({
-                input$holidays_file
+                holidays_upload()
         })
    
         ## selected Changepoints ----------------
