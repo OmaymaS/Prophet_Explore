@@ -142,12 +142,11 @@ server <- function(input, output, session) {
         ## propher forecast -----------
         prophet_model <- reactive({
                 req(dat(),
-                    input$growth, input$n.changepoints,
-                    input$yearly, input$monthly,
+                    input$n.changepoints,
                     input$seasonality_scale, input$changepoint_scale,
                     input$holidays_scale, input$mcmc.samples,
                     input$mcmc.samples, input$interval.width,
-                    input$uncertainty.samples, input$fit)
+                    input$uncertainty.samples)
                 
                 prophet(dat(),
                         growth = input$growth,
@@ -167,7 +166,7 @@ server <- function(input, output, session) {
         
         ## Make dataframe with future dates for forecasting -------------
         future <- reactive({
-                req(prophet_model(),input$periods, input$freq, input$include_history)
+                req(prophet_model(),input$periods, input$freq)
                 make_future_dataframe(prophet_model(),
                                       periods = input$periods,
                                       freq = input$freq,
@@ -195,7 +194,8 @@ server <- function(input, output, session) {
         
         
         ## test op -------------------
-        output$test <- renderPrint(changepoints_vector()
+        output$test <- renderPrint(input$yearly
+                # changepoints_vector()
                                    # prophet_model()[["changepoints"]]
         )
         
