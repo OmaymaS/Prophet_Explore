@@ -92,16 +92,16 @@ ui <- fluidPage(
                                   ## plot button -----------------
                                   column(width = 6,
                                          actionButton("plot_btn2", "Fit Prophet Model & Plot",
-                                                      style = "width:100%; margin-top: 25px;"))),
+                                                      style = "width:80%; margin-top: 25px;"))),
                           
-                          # fluidRow(column(width = 6,
-                          #                 conditionalPanel("input.ch_points_param",
-                          #                                  dateInput("ch_date", "Add changepoints",
-                          #                                            value = NULL))
-                          # ),
-                          
-                          column(width = 6,uiOutput("ch_points"))
-                          ),
+                          fluidRow(column(width = 6,
+                                          conditionalPanel("input.ch_points_param",
+                                                           dateInput("ch_date", "Add changepoints", value = NULL))
+                                          # uiOutput("date_in")
+                                          ),
+                                   
+                                   column(width = 6,uiOutput("ch_points"))
+                                   ),
                           
                           ## plot/results tabs --------------------------------
                           fluidRow(column(width=12,
@@ -211,7 +211,7 @@ server <- function(input, output, session) {
         
         ## test op -------------------
         # output$test <- renderPrint(changepoints_vector())
-        
+   
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
         #         req(prophet_model())
@@ -237,7 +237,7 @@ server <- function(input, output, session) {
         #                                     as.character(as.Date(as.numeric(input$ch_date),
         #                                                          origin="1970-01-01"))))
         # })
-        
+
         
 }
 
