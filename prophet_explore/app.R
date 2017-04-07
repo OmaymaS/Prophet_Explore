@@ -153,7 +153,7 @@ server <- function(input, output, session) {
         ## get holidays -------------
         holidays_upload <- reactive({
                 if(is.null(input$holidays_file)) h <- NULL
-                else h <- read.csv(input$holidays_file$datapath, header = T)
+                else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
         
@@ -228,7 +228,7 @@ server <- function(input, output, session) {
         
         ## test op -------------------
         output$test <- renderPrint({
-                holidays_upload()
+                holidays_upload() 
         })
    
         ## selected Changepoints ----------------
