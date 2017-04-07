@@ -71,9 +71,9 @@ ui <- fluidPage(
                                                     
                                                     ### parameter: freq
                                                     selectInput("freq","freq",
-                                                                choices = c('day', 'week', 'month', 'quarter','year')),
+                                                                choices = c('day', 'week', 'month', 'quarter','year'))
                                                     ### parameter: include_history
-                                                    checkboxInput("include_history","include_history", value = TRUE)
+                                                    # checkboxInput("include_history","include_history", value = TRUE)
                                            ))
                                
                   ),
@@ -90,8 +90,8 @@ ui <- fluidPage(
                                                            "text/comma-separated-values,text/plain",
                                                            ".csv"))),
                                   ## plot button -----------------
-                                  column(width = 3,
-                                         actionButton("plot_btn2", "Plot",
+                                  column(width = 6,
+                                         actionButton("plot_btn2", "Fit Prophet Model & Plot",
                                                       style = "width:100%; margin-top: 25px;"))),
                           
                           fluidRow(column(width = 6,
@@ -109,7 +109,9 @@ ui <- fluidPage(
                                                                plotOutput("ts_plot")),
                                                       tabPanel("Prophet Plot Components",
                                                                plotOutput("prophet_comp_plot")),
-                                                      tabPanel("Forecase Table",
+                                                      tabPanel("Forecast Table",
+                                                               downloadButton('downloadData', 'Download',
+                                                                              style = "width:100%; margin-bottom: 25px;"),
                                                                dataTableOutput("data")))
                           )
                           ),
@@ -167,7 +169,7 @@ server <- function(input, output, session) {
                 make_future_dataframe(prophet_model(),
                                       periods = input$periods,
                                       freq = input$freq,
-                                      include_history = input$include_history)
+                                      include_history = T)
         })
         
         ## predict future values -----------------------
@@ -196,17 +198,15 @@ server <- function(input, output, session) {
                         formatRound(columns=2:17,digits=4)
         })
         
-        ## test op -------------------
-        changepoints_vector <- reactive({
-                req(input$ch_points_param)
-                ch <- input$ch_points_param %>% 
-                        strsplit(",") %>% 
-                        unlist 
-                
-                if(length(ch)==0) NULL
-                else ch
-        })
         
+        output$downloadData <- downloadHandler(
+                filename = function() { paste(input$dataset, '.csv', sep='') },
+                content = function(file) {
+                        write.csv(forecast(), file)
+                }
+        )
+        
+        ## test op -------------------
         output$test <- renderPrint(changepoints_vector())
                                    # changepoints_vector()
                                    # prophet_model()[["changepoints"]]
@@ -221,6 +221,16 @@ server <- function(input, output, session) {
                               value=paste(prophet_model()$changepoints,collapse=", "))
         })
         
+        
+        changepoints_vector <- reactive({
+                req(input$ch_points_param)
+                ch <- input$ch_points_param %>% 
+                        strsplit(",") %>% 
+                        unlist 
+                
+                if(length(ch)==0) NULL
+                else ch
+        })
         
         # update textArea ------------------------
         observeEvent(input$ch_date,{
