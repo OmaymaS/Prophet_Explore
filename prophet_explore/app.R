@@ -61,7 +61,18 @@ ui <- fluidPage(
                                                     numericInput("uncertainty.samples","uncertainty.samples", value = 1000),
                                                     
                                                     ### parameter: fit
-                                                    checkboxInput("fit", "fit", value = TRUE)),
+                                                    checkboxInput("fit", "fit", value = TRUE),
+                                                    
+                                                    ### parameter: holidays
+                                                    fileInput("holidays_file","holidays (optional)",
+                                                              accept = c(
+                                                                      "text/csv",
+                                                                      "text/comma-separated-values,text/plain",
+                                                                      ".csv")),
+                                                  
+                                                    helpText("data frame with columns holiday (character) and ds (date type)and optionally columns lower_window and upper_window which specify a range of days around the date to be included as holidays.")
+                                                    
+                                                    ),
                                            
                                            tabPanel(HTML("predict <br> Parameters"),
                                                     
@@ -139,6 +150,12 @@ server <- function(input, output, session) {
                         mutate(y = log(y))
         })
         
+        ## get holidays -------------
+        holidays_upload <- reactive({
+                if(is.null(input$holidays_file)) h <- NULL
+                else h <- read.csv(input$holidays_file$datapath, header = T)
+                return(h)
+        })
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -210,7 +227,9 @@ server <- function(input, output, session) {
         )
         
         ## test op -------------------
-        # output$test <- renderPrint(changepoints_vector())
+        output$test <- renderPrint({
+                input$holidays_file
+        })
    
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
