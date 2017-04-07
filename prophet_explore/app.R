@@ -20,8 +20,15 @@ ui <- fluidPage(
                                                     
                                                     ## prophet() parameters ------------------------------
                                                     ### paramter: growth
-                                                    radioButtons("growth","growth",
+                                                    h5(tags$b("growth")),
+                                                    
+                                                    helpText("If growth is logistic, the input dataframe must have a column cap that specifies the capacity at each ds.",
+                                                             style = "margin-bottom: 0px;"),
+                                                    
+                                                    radioButtons("growth","",
                                                                  c('linear','logistic'), inline = TRUE),
+                                                    
+                                                    
                                                     
                                                     # ### date input
                                                     # dateInput("ch_date", "Add changepoints",value=NULL),
@@ -31,16 +38,17 @@ ui <- fluidPage(
                                                     # 
                                                     # uiOutput("ch_points"),
                                                     
-                                                    ### parameter: n.changepoints
-                                                    numericInput("n.changepoints","n.changepoints", value = 25),
+                                                    
+                                                    ### parameter: fit
+                                                    checkboxInput("fit", "fit", value = TRUE),
                                                     
                                                     ### parameter: yearly.seasonality
                                                     checkboxInput("yearly","yearly.seasonality", value = TRUE),
                                                     
                                                     ### parameter: weekly.seasonality 
                                                     checkboxInput("monthly","weekly.seasonality", value = TRUE),
-                                                    
-                                                    ### parameter: holidays
+                                                    ### parameter: n.changepoints
+                                                    numericInput("n.changepoints","n.changepoints", value = 25),
                                                     
                                                     ### parameter: seasonality.prior.scale
                                                     numericInput("seasonality_scale","seasonality.prior.scale", value = 10),
@@ -59,33 +67,33 @@ ui <- fluidPage(
                                                     
                                                     ### parameter: uncertainty.samples
                                                     numericInput("uncertainty.samples","uncertainty.samples", value = 1000),
-                                                    
-                                                    ### parameter: fit
-                                                    checkboxInput("fit", "fit", value = TRUE),
+                                                   
                                                     
                                                     ### parameter: holidays
-                                                    fileInput("holidays_file","holidays (optional)",
+                                                    h5(tags$b("holidays (optional)")),
+                                                    
+                                                    helpText("Upload a data frame with columns holiday (character) and ds (date type) and optionally columns lower_window and upper_window which specify a range of days around the date to be included as holidays."),
+                                                    
+                                                    fileInput("holidays_file","",
                                                               accept = c(
                                                                       "text/csv",
                                                                       "text/comma-separated-values,text/plain",
-                                                                      ".csv")),
-                                                  
-                                                    helpText("data frame with columns holiday (character) and ds (date type)and optionally columns lower_window and upper_window which specify a range of days around the date to be included as holidays.")
+                                                                      ".csv"))
                                                     
-                                                    ),
-                                           
-                                           tabPanel(HTML("predict <br> Parameters"),
-                                                    
-                                                    ## make_future_dataframe() parameters ------------------
-                                                    ### paramater: periods
-                                                    numericInput("periods","periods",value=365),
-                                                    
-                                                    ### parameter: freq
-                                                    selectInput("freq","freq",
-                                                                choices = c('day', 'week', 'month', 'quarter','year'))
-                                                    ### parameter: include_history
-                                                    # checkboxInput("include_history","include_history", value = TRUE)
-                                           ))
+                               ),
+                               
+                               tabPanel(HTML("predict <br> Parameters"),
+                                        
+                                        ## make_future_dataframe() parameters ------------------
+                                        ### paramater: periods
+                                        numericInput("periods","periods",value=365),
+                                        
+                                        ### parameter: freq
+                                        selectInput("freq","freq",
+                                                    choices = c('day', 'week', 'month', 'quarter','year'))
+                                        ### parameter: include_history
+                                        # checkboxInput("include_history","include_history", value = TRUE)
+                               ))
                                
                   ),
                   
@@ -109,10 +117,10 @@ ui <- fluidPage(
                                           conditionalPanel("input.ch_points_param",
                                                            dateInput("ch_date", "Add changepoints", value = NULL))
                                           # uiOutput("date_in")
-                                          ),
-                                   
-                                   column(width = 6,uiOutput("ch_points"))
-                                   ),
+                          ),
+                          
+                          column(width = 6,uiOutput("ch_points"))
+                          ),
                           
                           ## plot/results tabs --------------------------------
                           fluidRow(column(width=12,
@@ -131,8 +139,7 @@ ui <- fluidPage(
                           
                           ## test output --------
                           verbatimTextOutput("test")
-                          
-                          
+    
                   )
         )
 )
@@ -227,10 +234,10 @@ server <- function(input, output, session) {
         )
         
         ## test op -------------------
-        output$test <- renderPrint({
-                holidays_upload() 
-        })
-   
+        # output$test <- renderPrint({
+        #         holidays_upload() 
+        # })
+        
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
         #         req(prophet_model())
@@ -256,7 +263,7 @@ server <- function(input, output, session) {
         #                                     as.character(as.Date(as.numeric(input$ch_date),
         #                                                          origin="1970-01-01"))))
         # })
-
+        
         
 }
 
