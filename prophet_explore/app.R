@@ -11,10 +11,12 @@ ui <- fluidPage(
         
         # Application title
         titlePanel("Prophet Explore"),
-        helpText(HTML("Prophet Explore is a Shiny App that offers an interactive interface to explore the main functions of the "),
-                 tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]."),
+        helpText(tags$a(href="https://github.com/OmaymaS/Prophet_Explore","Prophet Explore "),
+                HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
+                 tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
+                HTML("; an open source software released by Facebook's Core Data Science team."),
                  tags$br(),
-                 HTML("Upload your data in the right format, tune the parameters, then press 'Fit Prophet Model and Plot'.")),
+                 HTML("To explore: upload your data in the right format, tune the parameters, then press 'Fit Prophet Model and Plot'.")),
         tags$br(),
         
         # Sidebar -------------------------------------
@@ -135,10 +137,6 @@ ui <- fluidPage(
                                                                plotOutput("prophet_comp_plot")),
                                                       tabPanel("Forecast Results",
                                                                uiOutput("dw_button"),
-                                                               # downloadButton('downloadData', 'Download Data',
-                                                               #                style = "width:20%;
-                                                               #                margin-bottom: 25px;
-                                                               #                margin-top: 25px;"),
                                                                dataTableOutput("data")))
                           )
                           ),
