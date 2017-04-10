@@ -6,9 +6,28 @@ library(ggplot2)
 library(DT)
 library(shinythemes)
 
+## CSS -------------------
+# inspired by daattali work at https://github.com/daattali/advanced-shiny/tree/master/plot-spinner
+mycss <- "
+#plot-container {
+position: relative;
+}
+#loading-spinner {
+position: absolute;
+left: 50%;
+top: 50%;
+z-index: -1;
+margin-top: -33px;  /* half of the spinner's height */
+margin-left: -33px; /* half of the spinner's width */
+}
+#plot.recalculating {
+z-index: -2;
+}
+"
 
 # UI ------------------------------
 ui <- fluidPage(
+        tags$head(tags$style(HTML(mycss))),
         
         # Application title
         titlePanel("Prophet Explore"),
@@ -132,13 +151,30 @@ ui <- fluidPage(
                           
                           ## plot/results tabs --------------------------------
                           fluidRow(column(width=12,
-                                          tabsetPanel(tabPanel("Forecast Plot",
-                                                               plotOutput("ts_plot")),
-                                                      tabPanel("Prophet Plot Components",
-                                                               plotOutput("prophet_comp_plot")),
-                                                      tabPanel("Forecast Results",
-                                                               uiOutput("dw_button"),
-                                                               dataTableOutput("data")))
+                                          tabsetPanel(
+                                                  tabPanel("Forecast Plot",
+                                                           conditionalPanel("input.plot_btn2",
+                                                                            div(id = "forecast-plot-container",
+                                                                                tags$img(src = "spinner.gif",
+                                                                                         id = "loading-spinner"),
+                                                                                plotOutput("ts_plot")))
+                                                  ),
+                                                  tabPanel("Prophet Plot Components",
+                                                           conditionalPanel("input.plot_btn2",
+                                                                            div(id = "components-plot-container",
+                                                                                tags$img(src = "spinner.gif",
+                                                                                         id = "loading-spinner"),
+                                                                                plotOutput("prophet_comp_plot")))
+                                                  ),
+                                                  tabPanel("Forecast Results",
+                                                           uiOutput("dw_button"),
+                                                           conditionalPanel("input.plot_btn2",
+                                                                            div(id = "data-container",
+                                                                                tags$img(src = "spinner.gif",
+                                                                                         id = "loading-spinner"),
+                                                                                plotOutput("data")))
+                                                  )
+                                          )
                           )
                           ),
                           
@@ -178,20 +214,24 @@ server <- function(input, output, session) {
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
                 
-                prophet(dat(),
-                        growth = input$growth,
-                        changepoints = NULL,
-                        n.changepoints = input$n.changepoints,
-                        yearly.seasonality = input$yearly,
-                        weekly.seasonality = input$monthly,
-                        holidays = holidays_upload(),
-                        seasonality.prior.scale = input$seasonality_scale,
-                        changepoint.prior.scale = input$changepoint_scale,
-                        holidays.prior.scale = input$holidays_scale,
-                        mcmc.samples = input$mcmc.samples,
-                        interval.width = input$interval.width,
-                        uncertainty.samples = input$uncertainty.samples,
-                        fit = input$fit)
+                
+                
+                
+                kk <- prophet(dat(),
+                              growth = input$growth,
+                              changepoints = NULL,
+                              n.changepoints = input$n.changepoints,
+                              yearly.seasonality = input$yearly,
+                              weekly.seasonality = input$monthly,
+                              holidays = holidays_upload(),
+                              seasonality.prior.scale = input$seasonality_scale,
+                              changepoint.prior.scale = input$changepoint_scale,
+                              holidays.prior.scale = input$holidays_scale,
+                              mcmc.samples = input$mcmc.samples,
+                              interval.width = input$interval.width,
+                              uncertainty.samples = input$uncertainty.samples,
+                              fit = input$fit)
+                
         })
         
         ## Make dataframe with future dates for forecasting -------------
@@ -211,20 +251,42 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
+                # input$plot_btn2
                 req(prophet_model(), forecast())
+                
                 g <- plot(prophet_model(), forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
+                # input$plot_btn2
                 req(prophet_model(), forecast())
                 
-                prophet_plot_components(prophet_model(), forecast())
+                prophet_plot_components(isolate(prophet_model()), isolate(forecast()))
         })
         
         ## create datatabke from forecast dataframe --------------------
         output$data <- renderDataTable({
+                
+                # input$plot_btn2
+                
+                # dat <- data.frame(x = numeric(0), y = numeric(0))
+                # 
+                # withProgress(message = 'Generating data', detail = "part 0", value = 0, {
+                #         for (i in 1:10) {
+                #                 # Each time through the loop, add another row of data. This a stand-in
+                #                 # for a long-running computation.
+                #                 dat <- rbind(dat, data.frame(x = rnorm(1), y = rnorm(1)))
+                #                 
+                #                 # Increment the progress bar, and update the detail text.
+                #                 incProgress(0.1, detail = paste("part", i))
+                #                 
+                #                 # Pause for 0.1 seconds to simulate a long computation.
+                #                 Sys.sleep(2)
+                #         }
+                # })
+                
                 datatable(forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
