@@ -172,7 +172,7 @@ ui <- fluidPage(
                                                                             div(id = "output-container",
                                                                                 tags$img(src = "spinner.gif",
                                                                                          id = "loading-spinner"),
-                                                                                plotOutput("data")))
+                                                                                dataTableOutput("data")))
                                                   )
                                           )
                           )
