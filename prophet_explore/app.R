@@ -9,7 +9,7 @@ library(shinythemes)
 ## CSS -------------------
 # inspired by daattali work at https://github.com/daattali/advanced-shiny/tree/master/plot-spinner
 mycss <- "
-#plot-container {
+#output-container {
 position: relative;
 }
 #loading-spinner {
@@ -154,14 +154,14 @@ ui <- fluidPage(
                                           tabsetPanel(
                                                   tabPanel("Forecast Plot",
                                                            conditionalPanel("input.plot_btn2",
-                                                                            div(id = "forecast-plot-container",
+                                                                            div(id = "output-container",
                                                                                 tags$img(src = "spinner.gif",
                                                                                          id = "loading-spinner"),
                                                                                 plotOutput("ts_plot")))
                                                   ),
                                                   tabPanel("Prophet Plot Components",
                                                            conditionalPanel("input.plot_btn2",
-                                                                            div(id = "components-plot-container",
+                                                                            div(id = "output-container",
                                                                                 tags$img(src = "spinner.gif",
                                                                                          id = "loading-spinner"),
                                                                                 plotOutput("prophet_comp_plot")))
@@ -169,7 +169,7 @@ ui <- fluidPage(
                                                   tabPanel("Forecast Results",
                                                            uiOutput("dw_button"),
                                                            conditionalPanel("input.plot_btn2",
-                                                                            div(id = "data-container",
+                                                                            div(id = "output-container",
                                                                                 tags$img(src = "spinner.gif",
                                                                                          id = "loading-spinner"),
                                                                                 plotOutput("data")))
