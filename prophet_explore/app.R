@@ -6,24 +6,6 @@ library(ggplot2)
 library(DT)
 library(shinythemes)
 
-## CSS -------------------
-# inspired by daattali work at https://github.com/daattali/advanced-shiny/tree/master/plot-spinner
-# mycss <- "
-# #output-container {
-# position: relative;
-# }
-# #loading-spinner {
-# position: absolute;
-# left: 50%;
-# top: 50%;
-# z-index: -1;
-# margin-top: -33px;  /* half of the spinner's height */
-# margin-left: -33px; /* half of the spinner's width */
-# }
-# #plot.recalculating {
-# z-index: -2;
-# }
-# "
 
 # UI ------------------------------
 ui <- fluidPage(
@@ -241,7 +223,7 @@ server <- function(input, output, session) {
                 make_future_dataframe(prophet_model(),
                                       periods = input$periods,
                                       freq = input$freq,
-                                      include_history = T)
+                                      include_history = input$include_history)
         })
         
         ## predict future values -----------------------
