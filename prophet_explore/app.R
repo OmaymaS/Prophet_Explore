@@ -8,26 +8,27 @@ library(shinythemes)
 
 ## CSS -------------------
 # inspired by daattali work at https://github.com/daattali/advanced-shiny/tree/master/plot-spinner
-mycss <- "
-#output-container {
-position: relative;
-}
-#loading-spinner {
-position: absolute;
-left: 50%;
-top: 50%;
-z-index: -1;
-margin-top: -33px;  /* half of the spinner's height */
-margin-left: -33px; /* half of the spinner's width */
-}
-#plot.recalculating {
-z-index: -2;
-}
-"
+# mycss <- "
+# #output-container {
+# position: relative;
+# }
+# #loading-spinner {
+# position: absolute;
+# left: 50%;
+# top: 50%;
+# z-index: -1;
+# margin-top: -33px;  /* half of the spinner's height */
+# margin-left: -33px; /* half of the spinner's width */
+# }
+# #plot.recalculating {
+# z-index: -2;
+# }
+# "
 
 # UI ------------------------------
 ui <- fluidPage(
-        tags$head(tags$style(HTML(mycss))),
+        # tags$head(tags$style(HTML(mycss))),
+        tags$head(tags$style(includeCSS("./www/mycss.css"))),
         
         # Application title
         titlePanel("Prophet Explore"),
@@ -117,9 +118,9 @@ ui <- fluidPage(
                                                 
                                                 ### parameter: freq
                                                 selectInput("freq","freq",
-                                                            choices = c('day', 'week', 'month', 'quarter','year'))
+                                                            choices = c('day', 'week', 'month', 'quarter','year')),
                                                 ### parameter: include_history
-                                                # checkboxInput("include_history","include_history", value = TRUE)
+                                                checkboxInput("include_history","include_history", value = TRUE)
                                        ))
                                
                   ),
