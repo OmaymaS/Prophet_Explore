@@ -39,18 +39,7 @@ ui <- fluidPage(
                                                 
                                                 radioButtons("growth","",
                                                              c('linear','logistic'), inline = TRUE),
-                                                
-                                                
-                                                
-                                                # ### date input
-                                                # dateInput("ch_date", "Add changepoints",value=NULL),
-                                                # 
-                                                # ### paramter: changepoints
-                                                # # textInput("changepoints","changepoints",NULL),
-                                                # 
-                                                # uiOutput("ch_points"),
-                                                
-                                                
+                                
                                                 ### parameter: fit
                                                 checkboxInput("fit", "fit", value = TRUE),
                                                 
@@ -222,11 +211,6 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
-
-        
-        # dup_dat <- duplicatedRecative(dat)
-        
-        # rv <- reactiveValues()
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -322,37 +306,11 @@ server <- function(input, output, session) {
                 }
         )
         
-        # ko <- Lastn(dat,init=vector(),n=2) 
+
         # ## test op -------------------
-        output$test <- renderPrint({
+        # output$test <- renderPrint({
                 # ko()
 
-        })
-        
-        ## selected Changepoints ----------------
-        # output$ch_points <- renderUI({
-        #         req(prophet_model())
-        #         textAreaInput("ch_points_param","Selected Changepoints",
-        #                       value=paste(prophet_model()$changepoints,collapse=", "))
-        # })
-        
-        ## changepoints_vector -------------------------
-        # changepoints_vector <- reactive({
-        #         req(input$ch_points_param)
-        #         ch <- input$ch_points_param %>% 
-        #                 strsplit(",") %>% 
-        #                 unlist 
-        #         
-        #         if(length(ch)==0) NULL
-        #         else ch
-        # })
-        
-        # update textArea ------------------------
-        # observeEvent(input$ch_date,{
-        #         updateTextAreaInput(session,"ch_points_param",
-        #                             value=c(input$ch_points_param,
-        #                                     as.character(as.Date(as.numeric(input$ch_date),
-        #                                                          origin="1970-01-01"))))
         # })
         
         
