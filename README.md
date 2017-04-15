@@ -6,6 +6,7 @@
 
 Prophet Explore is deployed on Shinyapp.io: [HERE](https://omaymas.shinyapps.io/prophet_explore/)
 
-## prophet Version Used:
+## prophet Version Used
+
 prophet's version used is the one on Github. 
 To install use: *devtools::install_github('facebookincubator/prophet', subdir='R')*
