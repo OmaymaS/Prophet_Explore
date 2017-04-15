@@ -200,7 +200,6 @@ server <- function(input, output, session) {
                 reactive(rv$acc)
         }
         
-
         
         ## read csv file data----------
         dat <- reactive({
@@ -227,6 +226,8 @@ server <- function(input, output, session) {
         
         # dup_dat <- duplicatedRecative(dat)
         
+        # rv <- reactiveValues()
+        
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
                 req(dat(),
@@ -251,7 +252,10 @@ server <- function(input, output, session) {
                               uncertainty.samples = input$uncertainty.samples,
                               fit = input$fit)
                 
+                
+                return(kk)
         })
+        
         
         ## dup reactive --------------
         p_model <- duplicatedRecative(prophet_model)
@@ -320,10 +324,10 @@ server <- function(input, output, session) {
         
         # ko <- Lastn(dat,init=vector(),n=2) 
         # ## test op -------------------
-        # output$test <- renderPrint({
-        #         
-        #         ko()
-        # })
+        output$test <- renderPrint({
+                # ko()
+
+        })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
