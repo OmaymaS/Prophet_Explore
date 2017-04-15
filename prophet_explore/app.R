@@ -5,10 +5,12 @@ library(prophet)
 library(ggplot2)
 library(DT)
 library(shinythemes)
+library(shinyjs)
 
 
 # UI ------------------------------
 ui <- fluidPage(
+        shinyjs::useShinyjs(),
         # tags$head(tags$style(HTML(mycss))),
         tags$head(tags$style(includeCSS("./www/mycss.css"))),
         
@@ -120,8 +122,11 @@ ui <- fluidPage(
                                                            ".csv"))),
                                   ## plot button -----------------
                                   column(width = 6,
-                                         actionButton("plot_btn2", "Fit Prophet Model & Plot",
-                                                      style = "width:80%; margin-top: 25px;"))),
+                                         shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
+                                                                        style = "width:80%; margin-top: 25px;"))
+                                         
+                                         )
+                                  ),
                           
                           fluidRow(column(width = 6,
                                           conditionalPanel("input.ch_points_param",
@@ -180,6 +185,23 @@ server <- function(input, output, session) {
                 read.csv(file_in$datapath, header = T) %>% 
                         mutate(y = log(y))
         })
+        
+        observeEvent(input$ts_file,{
+                shinyjs::enable("plot_btn2")
+        })
+        
+        # observeEvent(!(is.null(input$ts_file)),{
+        #         shinyjs::enable("plot_btn2")
+        # })
+        
+        # output$go_button <- renderUI({
+        #         if(is.null(input$ts_file)){
+        #                 
+        #         }else{
+        #                 
+        #         }
+        # })
+        
         
         ## get holidays -------------
         holidays_upload <- reactive({
@@ -292,9 +314,9 @@ server <- function(input, output, session) {
         )
         
         ## test op -------------------
-        # output$test <- renderPrint({
-        #         holidays_upload() 
-        # })
+        output$test <- renderPrint({
+                is.null(input$ts_file)
+        })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
