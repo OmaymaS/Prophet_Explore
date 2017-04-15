@@ -176,6 +176,32 @@ ui <- fluidPage(
 # Server -----------------------
 server <- function(input, output, session) {
         
+        ## function: duplicatedRecative values -----------------------------
+        duplicatedRecative <- function(signal){
+                values <- reactiveValues(val="")
+                
+                observe({
+                        values$val <- signal()
+                })
+                
+                reactive(values$val)
+        }
+        
+        
+        ## last n reactive --------------------
+        Lastn <- function(signal,init=list(),n=2){
+                rv <- reactiveValues(acc = init)
+                
+                observe({
+                        s <- signal()
+                        isolate(rv$acc <- c(rv$acc[2:n],list(s)))
+                        
+                })
+                reactive(rv$acc)
+        }
+        
+
+        
         ## read csv file data----------
         dat <- reactive({
                 req(input$ts_file)
@@ -197,6 +223,9 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
+
+        
+        # dup_dat <- duplicatedRecative(dat)
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -206,9 +235,6 @@ server <- function(input, output, session) {
                     input$holidays_scale, input$mcmc.samples,
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
-                
-                
-                
                 
                 kk <- prophet(dat(),
                               growth = input$growth,
@@ -227,60 +253,51 @@ server <- function(input, output, session) {
                 
         })
         
+        ## dup reactive --------------
+        p_model <- duplicatedRecative(prophet_model)
+        
         ## Make dataframe with future dates for forecasting -------------
         future <- eventReactive(input$plot_btn2,{
-                req(prophet_model(),input$periods, input$freq)
-                make_future_dataframe(prophet_model(),
+                req(p_model(),input$periods, input$freq)
+                make_future_dataframe(p_model(),
                                       periods = input$periods,
                                       freq = input$freq,
                                       include_history = input$include_history)
         })
         
+        ## dup reactive --------------
+        p_future <- duplicatedRecative(future)
+        
         ## predict future values -----------------------
         forecast <- reactive({
-                req(prophet_model(),future())
-                predict(prophet_model(), future())
+                req(p_model(),p_future())
+                predict(p_model(),p_future())
         })
+        
+        ## dup reactive --------------
+        p_forecast <- duplicatedRecative(forecast)
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
                 # input$plot_btn2
-                req(prophet_model(), forecast())
+                req(p_model(), p_forecast())
                 
-                g <- plot(prophet_model(), forecast())
+                g <- plot(p_model(),p_forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
                 # input$plot_btn2
-                req(prophet_model(), forecast())
+                req(p_model(), p_forecast())
                 
-                prophet_plot_components(isolate(prophet_model()), isolate(forecast()))
+                prophet_plot_components(p_model(),p_forecast())
         })
         
         ## create datatabke from forecast dataframe --------------------
         output$data <- renderDataTable({
                 
-                # input$plot_btn2
-                
-                # dat <- data.frame(x = numeric(0), y = numeric(0))
-                # 
-                # withProgress(message = 'Generating data', detail = "part 0", value = 0, {
-                #         for (i in 1:10) {
-                #                 # Each time through the loop, add another row of data. This a stand-in
-                #                 # for a long-running computation.
-                #                 dat <- rbind(dat, data.frame(x = rnorm(1), y = rnorm(1)))
-                #                 
-                #                 # Increment the progress bar, and update the detail text.
-                #                 incProgress(0.1, detail = paste("part", i))
-                #                 
-                #                 # Pause for 0.1 seconds to simulate a long computation.
-                #                 Sys.sleep(2)
-                #         }
-                # })
-                
-                datatable(forecast()) %>% 
+                datatable(p_forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
         
@@ -301,9 +318,11 @@ server <- function(input, output, session) {
                 }
         )
         
-        ## test op -------------------
+        # ko <- Lastn(dat,init=vector(),n=2) 
+        # ## test op -------------------
         # output$test <- renderPrint({
-        #         is.null(input$ts_file)
+        #         
+        #         ko()
         # })
         
         ## selected Changepoints ----------------
