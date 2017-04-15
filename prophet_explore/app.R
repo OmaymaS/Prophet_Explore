@@ -226,7 +226,33 @@ server <- function(input, output, session) {
         
         # dup_dat <- duplicatedRecative(dat)
         
-        # rv <- reactiveValues()
+        
+        
+        # observeEvent(input$plot_btn2,{
+        #         if(length(rv$dat_last)==0)
+        #                 rv$dat_last[[1]] <- dat()
+        #         
+        #         else if(length(rv$dat_last)==1){
+        #                 rv$dat_last[[2]] <- dat()
+        #                 
+        #         }else{
+        #                 rv$dat_last[[1]] <- rv$dat_last[[2]]
+        #                 rv$dat_last[[2]] <- dat()
+        #         }
+        # })
+        
+        
+        rv <- reactiveValues(dat_last = list(data.frame(),data.frame()))
+        
+        observeEvent(input$plot_btn2,{
+                if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0)
+                        rv$dat_last[[2]] <- dat()
+                
+                else{
+                        rv$dat_last[[1]] <- rv$dat_last[[2]]
+                        rv$dat_last[[2]] <- dat()
+                }
+        })
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -237,23 +263,31 @@ server <- function(input, output, session) {
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
                 
-                kk <- prophet(dat(),
-                              growth = input$growth,
-                              changepoints = NULL,
-                              n.changepoints = input$n.changepoints,
-                              yearly.seasonality = input$yearly,
-                              weekly.seasonality = input$monthly,
-                              holidays = holidays_upload(),
-                              seasonality.prior.scale = input$seasonality_scale,
-                              changepoint.prior.scale = input$changepoint_scale,
-                              holidays.prior.scale = input$holidays_scale,
-                              mcmc.samples = input$mcmc.samples,
-                              interval.width = input$interval.width,
-                              uncertainty.samples = input$uncertainty.samples,
-                              fit = input$fit)
+                
+                # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
+                #         
+                # {
+                        kk <- prophet(dat(),
+                               growth = input$growth,
+                               changepoints = NULL,
+                               n.changepoints = input$n.changepoints,
+                               yearly.seasonality = input$yearly,
+                               weekly.seasonality = input$monthly,
+                               holidays = holidays_upload(),
+                               seasonality.prior.scale = input$seasonality_scale,
+                               changepoint.prior.scale = input$changepoint_scale,
+                               holidays.prior.scale = input$holidays_scale,
+                               mcmc.samples = input$mcmc.samples,
+                               interval.width = input$interval.width,
+                               uncertainty.samples = input$uncertainty.samples,
+                               fit = input$fit)
                 
                 
                 return(kk)
+                # 
+                # } else
+                #         return(p_model())
+                
         })
         
         
@@ -325,7 +359,8 @@ server <- function(input, output, session) {
         # ko <- Lastn(dat,init=vector(),n=2) 
         # ## test op -------------------
         output$test <- renderPrint({
-                # ko()
+                rv$dat_last %>%  str
+                # p_model()
 
         })
         
