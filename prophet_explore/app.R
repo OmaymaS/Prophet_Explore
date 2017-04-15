@@ -189,16 +189,16 @@ server <- function(input, output, session) {
         
         
         ## last n reactive --------------------
-        Lastn <- function(signal,init=list(),n=2){
-                rv <- reactiveValues(acc = init)
-                
-                observe({
-                        s <- signal()
-                        isolate(rv$acc <- c(rv$acc[2:n],list(s)))
-                        
-                })
-                reactive(rv$acc)
-        }
+        # Lastn <- function(signal,init=list(),n=2){
+        #         rv <- reactiveValues(acc = init)
+        #         
+        #         observe({
+        #                 s <- signal()
+        #                 isolate(rv$acc <- c(rv$acc[2:n],list(s)))
+        #                 
+        #         })
+        #         reactive(rv$acc)
+        # }
         
         
         ## read csv file data----------
@@ -224,24 +224,6 @@ server <- function(input, output, session) {
         })
 
         
-        # dup_dat <- duplicatedRecative(dat)
-        
-        
-        
-        # observeEvent(input$plot_btn2,{
-        #         if(length(rv$dat_last)==0)
-        #                 rv$dat_last[[1]] <- dat()
-        #         
-        #         else if(length(rv$dat_last)==1){
-        #                 rv$dat_last[[2]] <- dat()
-        #                 
-        #         }else{
-        #                 rv$dat_last[[1]] <- rv$dat_last[[2]]
-        #                 rv$dat_last[[2]] <- dat()
-        #         }
-        # })
-        
-        
         rv <- reactiveValues(dat_last = list(data.frame(),data.frame()))
         
         observeEvent(input$plot_btn2,{
@@ -264,9 +246,9 @@ server <- function(input, output, session) {
                     input$uncertainty.samples)
                 
                 
-                # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
-                #         
-                # {
+                if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
+
+                {
                         kk <- prophet(dat(),
                                growth = input$growth,
                                changepoints = NULL,
@@ -284,9 +266,9 @@ server <- function(input, output, session) {
                 
                 
                 return(kk)
-                # 
-                # } else
-                #         return(p_model())
+
+                } else
+                        return(p_model())
                 
         })
         
@@ -318,24 +300,24 @@ server <- function(input, output, session) {
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
                 # input$plot_btn2
-                req(p_model(), p_forecast())
+                req(prophet_model(), forecast())
                 
-                g <- plot(p_model(),p_forecast())
+                g <- plot(prophet_model(), forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
                 # input$plot_btn2
-                req(p_model(), p_forecast())
+                req(prophet_model(), forecast())
                 
-                prophet_plot_components(p_model(),p_forecast())
+                prophet_plot_components(prophet_model(),forecast())
         })
         
         ## create datatabke from forecast dataframe --------------------
         output$data <- renderDataTable({
                 
-                datatable(p_forecast()) %>% 
+                datatable(forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
         
@@ -349,20 +331,19 @@ server <- function(input, output, session) {
         })
         
         output$downloadData <- downloadHandler(
-                # filename = function() { paste(input$dataset, '.csv', sep='') },
                 filename = "forecast_data.csv",
                 content = function(file) {
                         write.csv(forecast(), file)
                 }
         )
         
-        # ko <- Lastn(dat,init=vector(),n=2) 
+
         # ## test op -------------------
-        output$test <- renderPrint({
-                rv$dat_last %>%  str
+        # output$test <- renderPrint({
+        #         rv$dat_last %>%  str
                 # p_model()
 
-        })
+        # })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
