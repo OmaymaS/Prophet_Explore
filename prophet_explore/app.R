@@ -186,22 +186,10 @@ server <- function(input, output, session) {
                         mutate(y = log(y))
         })
         
+        ## enable calculate button when file is uploaded ---------------------
         observeEvent(input$ts_file,{
                 shinyjs::enable("plot_btn2")
         })
-        
-        # observeEvent(!(is.null(input$ts_file)),{
-        #         shinyjs::enable("plot_btn2")
-        # })
-        
-        # output$go_button <- renderUI({
-        #         if(is.null(input$ts_file)){
-        #                 
-        #         }else{
-        #                 
-        #         }
-        # })
-        
         
         ## get holidays -------------
         holidays_upload <- reactive({
@@ -314,9 +302,9 @@ server <- function(input, output, session) {
         )
         
         ## test op -------------------
-        output$test <- renderPrint({
-                is.null(input$ts_file)
-        })
+        # output$test <- renderPrint({
+        #         is.null(input$ts_file)
+        # })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
