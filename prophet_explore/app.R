@@ -127,19 +127,16 @@ ui <- fluidPage(
                         ## plot button -----------------
                         column(width = 6,
                                shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
-                                                              style = "width:80%; margin-top: 25px;"))
-                               
-                        )
-                ),
+                                                              style = "width:80%; margin-top: 25px;")))
+                        ),
                 
-                fluidRow(column(width = 6,
-                                conditionalPanel("input.ch_points_param",
-                                                 dateInput("ch_date", "Add changepoints", value = NULL))
-                                
-                ),
-                
-                column(width = 6,uiOutput("ch_points"))
-                ),
+                fluidRow(
+                        column(width = 12
+                                # uiOutput("ch_points", style = "width:100")
+                                # conditionalPanel("input.ch_points_param",
+                                #                  dateInput("ch_date", "Add changepoints", value = NULL))
+                               )
+                        ),
                 
                 ## plot/results tabs --------------------------------
                 fluidRow(column(width=12,
@@ -191,17 +188,17 @@ server <- function(input, output, session) {
                 reactive(values$val)
         }
         
-        ## last n reactive --------------------
-        # Lastn <- function(signal,init=list(),n=2){
-        #         rv <- reactiveValues(acc = init)
-        # 
-        #         observe({
-        #                 s <- signal()
-        #                 isolate(rv$acc <- c(rv$acc[2:n],list(s)))
-        # 
-        #         })
-        #         reactive(rv$acc)
-        # }
+        # last n reactive --------------------
+        Lastn <- function(signal,init=list(),n=2){
+                rv <- reactiveValues(acc = init)
+
+                observe({
+                        s <- signal()
+                        isolate(rv$acc <- c(rv$acc[2:n],list(s)))
+
+                })
+                reactive(rv$acc)
+        }
         # 
         # last2_dat <- Lastn(dat)
         
@@ -228,17 +225,43 @@ server <- function(input, output, session) {
                 return(h)
         })
         
+        prophet_args <- reactive({
+                list(dat = dat(),
+                     growth = input$growth,
+                     changepoints = NULL,
+                     n.changepoints = input$n.changepoints,
+                     yearly.seasonality = input$yearly,
+                     weekly.seasonality = input$monthly,
+                     holidays = holidays_upload(),
+                     seasonality.prior.scale = input$seasonality_scale,
+                     changepoint.prior.scale = input$changepoint_scale,
+                     holidays.prior.scale = input$holidays_scale,
+                     mcmc.samples = input$mcmc.samples,
+                     interval.width = input$interval.width,
+                     uncertainty.samples = input$uncertainty.samples,
+                     fit = input$fit)
+        })
+        
         
         ## reactiveValues to hold last 2 values of dat() ------------------------
-        rv <- reactiveValues(dat_last = list(data.frame(),data.frame()))
+        rv <- reactiveValues(dat_last = list(data.frame(),data.frame()),
+                             arg_last = list(first=list(),second=list()))
         
         observeEvent(input$plot_btn2,{
-                if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0)
+                if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0){
                         rv$dat_last[[2]] <- dat()
+                        rv$arg_last$second <- prophet_args()
+                        
+                }
+                        
                 
                 else{
                         rv$dat_last[[1]] <- rv$dat_last[[2]]
                         rv$dat_last[[2]] <- dat()
+                        
+                        rv$arg_last$first <- rv$arg_last$second
+                        rv$arg_last$second<- prophet_args()
+                                
                 }
         })
         
@@ -252,9 +275,9 @@ server <- function(input, output, session) {
                     input$uncertainty.samples)
                 
                 
-                if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
-                        
-                {
+                # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
+                #         
+                # {
                         kk <- prophet(dat(),
                                       growth = input$growth,
                                       changepoints = NULL,
@@ -269,12 +292,12 @@ server <- function(input, output, session) {
                                       interval.width = input$interval.width,
                                       uncertainty.samples = input$uncertainty.samples,
                                       fit = input$fit)
-                        
+                        # print(kk$changepoints)
                         
                         return(kk)
                         
-                } else
-                        return(p_model())
+                # } else
+                #         return(p_model())
                 
         })
         
@@ -340,21 +363,31 @@ server <- function(input, output, session) {
                 }
         )
         
-        
+        kk <- Lastn(prophet_args)
         # ## test op -------------------
         output$test <- renderPrint({
+                # prophet_args() %>%  str
+                kk()
+                
                 # rv$dat_last %>%  str
                 # last2_dat()
                 # p_model()
-                
+
         })
         
-        ## selected Changepoints ----------------
-        # output$ch_points <- renderUI({
-        #         req(prophet_model())
-        #         textAreaInput("ch_points_param","Selected Changepoints",
-        #                       value=paste(prophet_model()$changepoints,collapse=", "))
-        # })
+        # selected Changepoints ----------------
+        output$ch_points <- renderUI({
+                req(prophet_model())
+                
+                selectInput("ch_points_param","Selected Changepoints",
+                            choices = prophet_model()$changepoints,
+                            selected = prophet_model()$changepoints,
+                            multiple = T,
+                            selectize = T)
+                
+                # textAreaInput("ch_points_param","Selected Changepoints",
+                #               value=paste(prophet_model()$changepoints,collapse=", "))
+        })
         
         ## changepoints_vector -------------------------
         # changepoints_vector <- reactive({
