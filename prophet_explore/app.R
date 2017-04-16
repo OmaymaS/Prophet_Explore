@@ -10,12 +10,16 @@ library(shinyjs)
 
 # UI ------------------------------
 ui <- fluidPage(
+        ## shiny theme to use ------------------
+        theme = shinytheme("flatly"),
+        ## use shinyjs -------------------------
         shinyjs::useShinyjs(),
-        # tags$head(tags$style(HTML(mycss))),
+        ## include css file --------------------
         tags$head(tags$style(includeCSS("./www/mycss.css"))),
         
-        # Application title
+        ## Application title -------------------
         titlePanel("Prophet Explore"),
+        ## Help text paragraph ----------------
         helpText(tags$a(href="https://github.com/OmaymaS/Prophet_Explore","Prophet Explore "),
                  HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
                  tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
@@ -25,12 +29,11 @@ ui <- fluidPage(
         tags$br(),
         
         # Sidebar -------------------------------------
-        fluidPage(theme = shinytheme("flatly"),
-                  sidebarPanel(width=3,
+        fluidPage(sidebarPanel(width=3,
                                tabsetPanel(
+                                       ## Tab prophet parameters ----------------------------
                                        tabPanel(HTML("prophet <br> Parameters"),
                                                 
-                                                ## prophet() parameters ------------------------------
                                                 ### paramter: growth
                                                 h5(tags$b("growth")),
                                                 
@@ -83,6 +86,7 @@ ui <- fluidPage(
                                                 
                                        ),
                                        
+                                       ## Tab predict parameters -------------------------
                                        tabPanel(HTML("predict <br> Parameters"),
                                                 
                                                 ## make_future_dataframe() parameters ------------------
@@ -96,69 +100,66 @@ ui <- fluidPage(
                                                 checkboxInput("include_history","include_history", value = TRUE)
                                        ))
                                
-                  ),
-                  
-                  # Main panel -------------------------
-                  mainPanel(
-                          
-                          fluidRow(
-                                  ## upload file -----------------
-                                  column(width = 6,
-                                         fileInput("ts_file","Choose CSV File",
-                                                   accept = c(
-                                                           "text/csv",
-                                                           "text/comma-separated-values,text/plain",
-                                                           ".csv"))),
-                                  ## plot button -----------------
-                                  column(width = 6,
-                                         shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
-                                                                        style = "width:80%; margin-top: 25px;"))
-                                         
-                                         )
-                                  ),
-                          
-                          fluidRow(column(width = 6,
-                                          conditionalPanel("input.ch_points_param",
-                                                           dateInput("ch_date", "Add changepoints", value = NULL))
-                                          
-                          ),
-                          
-                          column(width = 6,uiOutput("ch_points"))
-                          ),
-                          
-                          ## plot/results tabs --------------------------------
-                          fluidRow(column(width=12,
-                                          tabsetPanel(
-                                                  tabPanel("Forecast Plot",
-                                                           conditionalPanel("input.plot_btn2",
-                                                                            div(id = "output-container",
-                                                                                tags$img(src = "spinner.gif",
-                                                                                         id = "loading-spinner"),
-                                                                                plotOutput("ts_plot")))
-                                                  ),
-                                                  tabPanel("Prophet Plot Components",
-                                                           conditionalPanel("input.plot_btn2",
-                                                                            div(id = "output-container",
-                                                                                tags$img(src = "spinner.gif",
-                                                                                         id = "loading-spinner"),
-                                                                                plotOutput("prophet_comp_plot")))
-                                                  ),
-                                                  tabPanel("Forecast Results",
-                                                           uiOutput("dw_button"),
-                                                           conditionalPanel("input.plot_btn2",
-                                                                            div(id = "output-container",
-                                                                                tags$img(src = "spinner.gif",
-                                                                                         id = "loading-spinner"),
-                                                                                dataTableOutput("data")))
-                                                  )
-                                          )
-                          )
-                          ),
-                          
-                          ## test output --------
-                          verbatimTextOutput("test")
-                          
-                  )
+        ),
+        
+        # Main panel -------------------------
+        mainPanel(
+                
+                fluidRow(
+                        ## upload file -----------------
+                        column(width = 6,
+                               fileInput("ts_file","Choose CSV File",
+                                         accept = c(
+                                                 "text/csv",
+                                                 "text/comma-separated-values,text/plain",
+                                                 ".csv"))),
+                        ## plot button -----------------
+                        column(width = 6,
+                               shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
+                                                              style = "width:80%; margin-top: 25px;")))
+                        ),
+                
+                fluidRow(
+                        column(width = 12
+                                # uiOutput("ch_points", style = "width:100")
+                                # conditionalPanel("input.ch_points_param",
+                                #                  dateInput("ch_date", "Add changepoints", value = NULL))
+                               )
+                        ),
+                
+                ## plot/results tabs --------------------------------
+                fluidRow(column(width=12,
+                                tabsetPanel(
+                                        tabPanel("Forecast Plot",
+                                                 conditionalPanel("input.plot_btn2",
+                                                                  div(id = "output-container",
+                                                                      tags$img(src = "spinner.gif",
+                                                                               id = "loading-spinner"),
+                                                                      plotOutput("ts_plot")))
+                                        ),
+                                        tabPanel("Prophet Plot Components",
+                                                 conditionalPanel("input.plot_btn2",
+                                                                  div(id = "output-container",
+                                                                      tags$img(src = "spinner.gif",
+                                                                               id = "loading-spinner"),
+                                                                      plotOutput("prophet_comp_plot")))
+                                        ),
+                                        tabPanel("Forecast Results",
+                                                 uiOutput("dw_button"),
+                                                 conditionalPanel("input.plot_btn2",
+                                                                  div(id = "output-container",
+                                                                      tags$img(src = "spinner.gif",
+                                                                               id = "loading-spinner"),
+                                                                      dataTableOutput("data")))
+                                        )
+                                )
+                )
+                ),
+                
+                ## test output --------
+                verbatimTextOutput("test")
+                
+        )
         )
 )
 
@@ -176,18 +177,19 @@ server <- function(input, output, session) {
                 reactive(values$val)
         }
         
-        
-        ## last n reactive --------------------
+        # last n reactive --------------------
         Lastn <- function(signal,init=list(),n=2){
                 rv <- reactiveValues(acc = init)
-                
+
                 observe({
                         s <- signal()
                         isolate(rv$acc <- c(rv$acc[2:n],list(s)))
-                        
+
                 })
                 reactive(rv$acc)
         }
+        # 
+        # last2_dat <- Lastn(dat)
         
         
         ## read csv file data----------
@@ -211,6 +213,47 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
+
+        prophet_args <- reactive({
+                list(dat = dat(),
+                     growth = input$growth,
+                     changepoints = NULL,
+                     n.changepoints = input$n.changepoints,
+                     yearly.seasonality = input$yearly,
+                     weekly.seasonality = input$monthly,
+                     holidays = holidays_upload(),
+                     seasonality.prior.scale = input$seasonality_scale,
+                     changepoint.prior.scale = input$changepoint_scale,
+                     holidays.prior.scale = input$holidays_scale,
+                     mcmc.samples = input$mcmc.samples,
+                     interval.width = input$interval.width,
+                     uncertainty.samples = input$uncertainty.samples,
+                     fit = input$fit)
+        })
+        
+        
+        ## reactiveValues to hold last 2 values of dat() ------------------------
+        rv <- reactiveValues(dat_last = list(data.frame(),data.frame()),
+                             arg_last = list(first=list(),second=list()))
+        
+        observeEvent(input$plot_btn2,{
+                if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0){
+                        rv$dat_last[[2]] <- dat()
+                        rv$arg_last$second <- prophet_args()
+                        
+                }
+                        
+                
+                else{
+                        rv$dat_last[[1]] <- rv$dat_last[[2]]
+                        rv$dat_last[[2]] <- dat()
+                        
+                        rv$arg_last$first <- rv$arg_last$second
+                        rv$arg_last$second<- prophet_args()
+                                
+                }
+        })
+
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -221,25 +264,32 @@ server <- function(input, output, session) {
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
                 
-                kk <- prophet(dat(),
-                              growth = input$growth,
-                              changepoints = NULL,
-                              n.changepoints = input$n.changepoints,
-                              yearly.seasonality = input$yearly,
-                              weekly.seasonality = input$monthly,
-                              holidays = holidays_upload(),
-                              seasonality.prior.scale = input$seasonality_scale,
-                              changepoint.prior.scale = input$changepoint_scale,
-                              holidays.prior.scale = input$holidays_scale,
-                              mcmc.samples = input$mcmc.samples,
-                              interval.width = input$interval.width,
-                              uncertainty.samples = input$uncertainty.samples,
-                              fit = input$fit)
                 
+                # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
+                #         
+                # {
+                        kk <- prophet(dat(),
+                                      growth = input$growth,
+                                      changepoints = NULL,
+                                      n.changepoints = input$n.changepoints,
+                                      yearly.seasonality = input$yearly,
+                                      weekly.seasonality = input$monthly,
+                                      holidays = holidays_upload(),
+                                      seasonality.prior.scale = input$seasonality_scale,
+                                      changepoint.prior.scale = input$changepoint_scale,
+                                      holidays.prior.scale = input$holidays_scale,
+                                      mcmc.samples = input$mcmc.samples,
+                                      interval.width = input$interval.width,
+                                      uncertainty.samples = input$uncertainty.samples,
+                                      fit = input$fit)
+                        # print(kk$changepoints)
+                        
+                        return(kk)
+                        
+                # } else
+                #         return(p_model())
                 
-                return(kk)
         })
-        
         
         ## dup reactive --------------
         p_model <- duplicatedRecative(prophet_model)
@@ -267,25 +317,23 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                # input$plot_btn2
-                req(p_model(), p_forecast())
+                req(prophet_model(), forecast())
                 
-                g <- plot(p_model(),p_forecast())
+                g <- plot(prophet_model(), forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
-                # input$plot_btn2
-                req(p_model(), p_forecast())
+                req(prophet_model(), forecast())
                 
-                prophet_plot_components(p_model(),p_forecast())
+                prophet_plot_components(prophet_model(),forecast())
         })
         
-        ## create datatabke from forecast dataframe --------------------
+        ## create datatable from forecast dataframe --------------------
         output$data <- renderDataTable({
                 
-                datatable(p_forecast()) %>% 
+                datatable(forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
         
@@ -299,7 +347,6 @@ server <- function(input, output, session) {
         })
         
         output$downloadData <- downloadHandler(
-                # filename = function() { paste(input$dataset, '.csv', sep='') },
                 filename = "forecast_data.csv",
                 content = function(file) {
                         write.csv(forecast(), file)
@@ -307,10 +354,64 @@ server <- function(input, output, session) {
         )
         
 
-        # ## test op -------------------
-        # output$test <- renderPrint({
-                # ko()
+        
+        ## selected Changepoints ----------------
+        # output$ch_points <- renderUI({
+        #         req(prophet_model())
+        #         textAreaInput("ch_points_param","Selected Changepoints",
+        #                       value=paste(prophet_model()$changepoints,collapse=", "))
+        # })
+        
+        ## changepoints_vector -------------------------
+        # changepoints_vector <- reactive({
+        #         req(input$ch_points_param)
+        #         ch <- input$ch_points_param %>% 
+        #                 strsplit(",") %>% 
+        #                 unlist 
+        #         
+        #         if(length(ch)==0) NULL
+        #         else ch
+        # })
+        
+        # update textArea ------------------------
+        # observeEvent(input$ch_date,{
+        #         updateTextAreaInput(session,"ch_points_param",
+        #                             value=c(input$ch_points_param,
+        #                                     as.character(as.Date(as.numeric(input$ch_date),
+        #                                                          origin="1970-01-01"))))
 
+        
+        # selected Changepoints ----------------
+        output$ch_points <- renderUI({
+                req(prophet_model())
+                
+                selectInput("ch_points_param","Selected Changepoints",
+                            choices = prophet_model()$changepoints,
+                            selected = prophet_model()$changepoints,
+                            multiple = T,
+                            selectize = T)
+                
+                # textAreaInput("ch_points_param","Selected Changepoints",
+                #               value=paste(prophet_model()$changepoints,collapse=", "))
+        })
+        
+        ## changepoints_vector -------------------------
+        # changepoints_vector <- reactive({
+        #         req(input$ch_points_param)
+        #         ch <- input$ch_points_param %>% 
+        #                 strsplit(",") %>% 
+        #                 unlist 
+        #         
+        #         if(length(ch)==0) NULL
+        #         else ch
+        # })
+        
+        # update textArea ------------------------
+        # observeEvent(input$ch_date,{
+        #         updateTextAreaInput(session,"ch_points_param",
+        #                             value=c(input$ch_points_param,
+        #                                     as.character(as.Date(as.numeric(input$ch_date),
+        #                                                          origin="1970-01-01"))))
         # })
         
         
