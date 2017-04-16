@@ -9,9 +9,9 @@ library(shinyjs)
 
 
 # UI ------------------------------
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("flatly"),
         shinyjs::useShinyjs(),
-        # tags$head(tags$style(HTML(mycss))),
+        ## include css file --------------------
         tags$head(tags$style(includeCSS("./www/mycss.css"))),
         
         # Application title
@@ -25,7 +25,7 @@ ui <- fluidPage(
         tags$br(),
         
         # Sidebar -------------------------------------
-        fluidPage(theme = shinytheme("flatly"),
+        fluidPage(
                   sidebarPanel(width=3,
                                tabsetPanel(
                                        tabPanel(HTML("prophet <br> Parameters"),
@@ -125,8 +125,8 @@ ui <- fluidPage(
                                          shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
                                                                         style = "width:80%; margin-top: 25px;"))
                                          
-                                         )
-                                  ),
+                                  )
+                          ),
                           
                           fluidRow(column(width = 6,
                                           conditionalPanel("input.ch_points_param",
@@ -187,18 +187,19 @@ server <- function(input, output, session) {
                 reactive(values$val)
         }
         
-        
         ## last n reactive --------------------
         # Lastn <- function(signal,init=list(),n=2){
         #         rv <- reactiveValues(acc = init)
-        #         
+        # 
         #         observe({
         #                 s <- signal()
         #                 isolate(rv$acc <- c(rv$acc[2:n],list(s)))
-        #                 
+        # 
         #         })
         #         reactive(rv$acc)
         # }
+        # 
+        # last2_dat <- Lastn(dat)
         
         
         ## read csv file data----------
@@ -222,8 +223,9 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
-
         
+        
+        ## reactiveValues to hold last 2 values of dat() ------------------------
         rv <- reactiveValues(dat_last = list(data.frame(),data.frame()))
         
         observeEvent(input$plot_btn2,{
@@ -247,31 +249,30 @@ server <- function(input, output, session) {
                 
                 
                 if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
-
+                        
                 {
                         kk <- prophet(dat(),
-                               growth = input$growth,
-                               changepoints = NULL,
-                               n.changepoints = input$n.changepoints,
-                               yearly.seasonality = input$yearly,
-                               weekly.seasonality = input$monthly,
-                               holidays = holidays_upload(),
-                               seasonality.prior.scale = input$seasonality_scale,
-                               changepoint.prior.scale = input$changepoint_scale,
-                               holidays.prior.scale = input$holidays_scale,
-                               mcmc.samples = input$mcmc.samples,
-                               interval.width = input$interval.width,
-                               uncertainty.samples = input$uncertainty.samples,
-                               fit = input$fit)
-                
-                
-                return(kk)
-
+                                      growth = input$growth,
+                                      changepoints = NULL,
+                                      n.changepoints = input$n.changepoints,
+                                      yearly.seasonality = input$yearly,
+                                      weekly.seasonality = input$monthly,
+                                      holidays = holidays_upload(),
+                                      seasonality.prior.scale = input$seasonality_scale,
+                                      changepoint.prior.scale = input$changepoint_scale,
+                                      holidays.prior.scale = input$holidays_scale,
+                                      mcmc.samples = input$mcmc.samples,
+                                      interval.width = input$interval.width,
+                                      uncertainty.samples = input$uncertainty.samples,
+                                      fit = input$fit)
+                        
+                        
+                        return(kk)
+                        
                 } else
                         return(p_model())
                 
         })
-        
         
         ## dup reactive --------------
         p_model <- duplicatedRecative(prophet_model)
@@ -299,7 +300,6 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                # input$plot_btn2
                 req(prophet_model(), forecast())
                 
                 g <- plot(prophet_model(), forecast())
@@ -308,13 +308,12 @@ server <- function(input, output, session) {
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
-                # input$plot_btn2
                 req(prophet_model(), forecast())
                 
                 prophet_plot_components(prophet_model(),forecast())
         })
         
-        ## create datatabke from forecast dataframe --------------------
+        ## create datatable from forecast dataframe --------------------
         output$data <- renderDataTable({
                 
                 datatable(forecast()) %>% 
@@ -337,13 +336,14 @@ server <- function(input, output, session) {
                 }
         )
         
-
+        
         # ## test op -------------------
-        # output$test <- renderPrint({
-        #         rv$dat_last %>%  str
+        output$test <- renderPrint({
+                # rv$dat_last %>%  str
+                # last2_dat()
                 # p_model()
-
-        # })
+                
+        })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
