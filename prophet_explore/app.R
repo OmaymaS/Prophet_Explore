@@ -188,9 +188,6 @@ server <- function(input, output, session) {
                 })
                 reactive(rv$acc)
         }
-        # 
-        # last2_dat <- Lastn(dat)
-        
         
         ## read csv file data----------
         dat <- reactive({
@@ -213,46 +210,31 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
-
-        prophet_args <- reactive({
-                list(dat = dat(),
-                     growth = input$growth,
-                     changepoints = NULL,
-                     n.changepoints = input$n.changepoints,
-                     yearly.seasonality = input$yearly,
-                     weekly.seasonality = input$monthly,
-                     holidays = holidays_upload(),
-                     seasonality.prior.scale = input$seasonality_scale,
-                     changepoint.prior.scale = input$changepoint_scale,
-                     holidays.prior.scale = input$holidays_scale,
-                     mcmc.samples = input$mcmc.samples,
-                     interval.width = input$interval.width,
-                     uncertainty.samples = input$uncertainty.samples,
-                     fit = input$fit)
-        })
+        
+        
         
         
         ## reactiveValues to hold last 2 values of dat() ------------------------
-        rv <- reactiveValues(dat_last = list(data.frame(),data.frame()),
-                             arg_last = list(first=list(),second=list()))
-        
-        observeEvent(input$plot_btn2,{
-                if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0){
-                        rv$dat_last[[2]] <- dat()
-                        rv$arg_last$second <- prophet_args()
-                        
-                }
-                        
-                
-                else{
-                        rv$dat_last[[1]] <- rv$dat_last[[2]]
-                        rv$dat_last[[2]] <- dat()
-                        
-                        rv$arg_last$first <- rv$arg_last$second
-                        rv$arg_last$second<- prophet_args()
-                                
-                }
-        })
+        # rv <- reactiveValues(dat_last = list(data.frame(),data.frame()),
+        #                      arg_last = list(first=list(),second=list()))
+        # 
+        # observeEvent(input$plot_btn2,{
+        #         if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0){
+        #                 rv$dat_last[[2]] <- dat()
+        #                 rv$arg_last$second <- prophet_args()
+        #                 
+        #         }
+        #                 
+        #         
+        #         else{
+        #                 rv$dat_last[[1]] <- rv$dat_last[[2]]
+        #                 rv$dat_last[[2]] <- dat()
+        #                 
+        #                 rv$arg_last$first <- rv$arg_last$second
+        #                 rv$arg_last$second<- prophet_args()
+        #                         
+        #         }
+        # })
 
         
         ## create prophet model -----------
@@ -352,67 +334,6 @@ server <- function(input, output, session) {
                         write.csv(forecast(), file)
                 }
         )
-        
-
-        
-        ## selected Changepoints ----------------
-        # output$ch_points <- renderUI({
-        #         req(prophet_model())
-        #         textAreaInput("ch_points_param","Selected Changepoints",
-        #                       value=paste(prophet_model()$changepoints,collapse=", "))
-        # })
-        
-        ## changepoints_vector -------------------------
-        # changepoints_vector <- reactive({
-        #         req(input$ch_points_param)
-        #         ch <- input$ch_points_param %>% 
-        #                 strsplit(",") %>% 
-        #                 unlist 
-        #         
-        #         if(length(ch)==0) NULL
-        #         else ch
-        # })
-        
-        # update textArea ------------------------
-        # observeEvent(input$ch_date,{
-        #         updateTextAreaInput(session,"ch_points_param",
-        #                             value=c(input$ch_points_param,
-        #                                     as.character(as.Date(as.numeric(input$ch_date),
-        #                                                          origin="1970-01-01"))))
-
-        
-        # selected Changepoints ----------------
-        output$ch_points <- renderUI({
-                req(prophet_model())
-                
-                selectInput("ch_points_param","Selected Changepoints",
-                            choices = prophet_model()$changepoints,
-                            selected = prophet_model()$changepoints,
-                            multiple = T,
-                            selectize = T)
-                
-                # textAreaInput("ch_points_param","Selected Changepoints",
-                #               value=paste(prophet_model()$changepoints,collapse=", "))
-        })
-        
-        ## changepoints_vector -------------------------
-        # changepoints_vector <- reactive({
-        #         req(input$ch_points_param)
-        #         ch <- input$ch_points_param %>% 
-        #                 strsplit(",") %>% 
-        #                 unlist 
-        #         
-        #         if(length(ch)==0) NULL
-        #         else ch
-        # })
-        
-        # update textArea ------------------------
-        # observeEvent(input$ch_date,{
-        #         updateTextAreaInput(session,"ch_points_param",
-        #                             value=c(input$ch_points_param,
-        #                                     as.character(as.Date(as.numeric(input$ch_date),
-        #                                                          origin="1970-01-01"))))
-        # })
         
         
 }
