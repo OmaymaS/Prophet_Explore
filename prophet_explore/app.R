@@ -44,7 +44,7 @@ ui <- fluidPage(
                                                              c('linear','logistic'), inline = TRUE),
                                 
                                                 ### parameter: fit
-                                                checkboxInput("fit", "fit", value = TRUE),
+                                                # checkboxInput("fit", "fit", value = TRUE),
                                                 
                                                 ### parameter: yearly.seasonality
                                                 checkboxInput("yearly","yearly.seasonality", value = TRUE),
@@ -178,16 +178,16 @@ server <- function(input, output, session) {
         }
         
         # last n reactive --------------------
-        Lastn <- function(signal,init=list(),n=2){
-                rv <- reactiveValues(acc = init)
-
-                observe({
-                        s <- signal()
-                        isolate(rv$acc <- c(rv$acc[2:n],list(s)))
-
-                })
-                reactive(rv$acc)
-        }
+        # Lastn <- function(signal,init=list(),n=2){
+        #         rv <- reactiveValues(acc = init)
+        # 
+        #         observe({
+        #                 s <- signal()
+        #                 isolate(rv$acc <- c(rv$acc[2:n],list(s)))
+        # 
+        #         })
+        #         reactive(rv$acc)
+        # }
         
         ## read csv file data----------
         dat <- reactive({
@@ -211,7 +211,23 @@ server <- function(input, output, session) {
                 return(h)
         })
         
-        
+        # prophet arguements ----------------------
+        # prophet_args <- reactive({
+        #         list(dat = dat(),
+        #              growth = input$growth,
+        #              changepoints = NULL,
+        #              n.changepoints = input$n.changepoints,
+        #              yearly.seasonality = input$yearly,
+        #              weekly.seasonality = input$monthly,
+        #              holidays = holidays_upload(),
+        #              seasonality.prior.scale = input$seasonality_scale,
+        #              changepoint.prior.scale = input$changepoint_scale,
+        #              holidays.prior.scale = input$holidays_scale,
+        #              mcmc.samples = input$mcmc.samples,
+        #              interval.width = input$interval.width,
+        #              uncertainty.samples = input$uncertainty.samples,
+        #              fit = input$fit)
+        # })
         
         
         ## reactiveValues to hold last 2 values of dat() ------------------------
@@ -263,7 +279,7 @@ server <- function(input, output, session) {
                                       mcmc.samples = input$mcmc.samples,
                                       interval.width = input$interval.width,
                                       uncertainty.samples = input$uncertainty.samples,
-                                      fit = input$fit)
+                                      fit = T)
                         # print(kk$changepoints)
                         
                         return(kk)
@@ -334,6 +350,68 @@ server <- function(input, output, session) {
                         write.csv(forecast(), file)
                 }
         )
+        
+
+        ## output tes --------------
+        # output$test <- renderPrint({
+        #         # input$fit
+        # })
+        # 
+        ## selected Changepoints ----------------
+        # output$ch_points <- renderUI({
+        #         req(prophet_model())
+        #         textAreaInput("ch_points_param","Selected Changepoints",
+        #                       value=paste(prophet_model()$changepoints,collapse=", "))
+        # })
+        
+        ## changepoints_vector -------------------------
+        # changepoints_vector <- reactive({
+        #         req(input$ch_points_param)
+        #         ch <- input$ch_points_param %>% 
+        #                 strsplit(",") %>% 
+        #                 unlist 
+        #         
+        #         if(length(ch)==0) NULL
+        #         else ch
+        # })
+        
+        # update textArea ------------------------
+        # observeEvent(input$ch_date,{
+        #         updateTextAreaInput(session,"ch_points_param",
+        #                             value=c(input$ch_points_param,
+        #                                     as.character(as.Date(as.numeric(input$ch_date),
+        #                                                          origin="1970-01-01"))))
+
+        
+        # selected Changepoints ----------------
+        # output$ch_points <- renderUI({
+        #         req(prophet_model())
+        #         
+        #         selectInput("ch_points_param","Selected Changepoints",
+        #                     choices = prophet_model()$changepoints,
+        #                     selected = prophet_model()$changepoints,
+        #                     multiple = T,
+        #                     selectize = T)
+        # })
+        
+        ## changepoints_vector -------------------------
+        # changepoints_vector <- reactive({
+        #         req(input$ch_points_param)
+        #         ch <- input$ch_points_param %>% 
+        #                 strsplit(",") %>% 
+        #                 unlist 
+        #         
+        #         if(length(ch)==0) NULL
+        #         else ch
+        # })
+        
+        # update textArea ------------------------
+        # observeEvent(input$ch_date,{
+        #         updateTextAreaInput(session,"ch_points_param",
+        #                             value=c(input$ch_points_param,
+        #                                     as.character(as.Date(as.numeric(input$ch_date),
+        #                                                          origin="1970-01-01"))))
+        # })
         
         
 }
