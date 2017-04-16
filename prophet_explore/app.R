@@ -9,13 +9,17 @@ library(shinyjs)
 
 
 # UI ------------------------------
-ui <- fluidPage(theme = shinytheme("flatly"),
+ui <- fluidPage(
+        ## shiny theme to use ------------------
+        theme = shinytheme("flatly"),
+        ## use shinyjs -------------------------
         shinyjs::useShinyjs(),
         ## include css file --------------------
         tags$head(tags$style(includeCSS("./www/mycss.css"))),
         
-        # Application title
+        ## Application title -------------------
         titlePanel("Prophet Explore"),
+        ## Help text paragraph ----------------
         helpText(tags$a(href="https://github.com/OmaymaS/Prophet_Explore","Prophet Explore "),
                  HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
                  tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
@@ -25,12 +29,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         tags$br(),
         
         # Sidebar -------------------------------------
-        fluidPage(
-                  sidebarPanel(width=3,
+        fluidPage(sidebarPanel(width=3,
                                tabsetPanel(
+                                       ## Tab prophet parameters ----------------------------
                                        tabPanel(HTML("prophet <br> Parameters"),
                                                 
-                                                ## prophet() parameters ------------------------------
                                                 ### paramter: growth
                                                 h5(tags$b("growth")),
                                                 
@@ -94,6 +97,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                                 
                                        ),
                                        
+                                       ## Tab predict parameters -------------------------
                                        tabPanel(HTML("predict <br> Parameters"),
                                                 
                                                 ## make_future_dataframe() parameters ------------------
@@ -107,69 +111,69 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                                 checkboxInput("include_history","include_history", value = TRUE)
                                        ))
                                
-                  ),
-                  
-                  # Main panel -------------------------
-                  mainPanel(
-                          
-                          fluidRow(
-                                  ## upload file -----------------
-                                  column(width = 6,
-                                         fileInput("ts_file","Choose CSV File",
-                                                   accept = c(
-                                                           "text/csv",
-                                                           "text/comma-separated-values,text/plain",
-                                                           ".csv"))),
-                                  ## plot button -----------------
-                                  column(width = 6,
-                                         shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
-                                                                        style = "width:80%; margin-top: 25px;"))
-                                         
-                                  )
-                          ),
-                          
-                          fluidRow(column(width = 6,
-                                          conditionalPanel("input.ch_points_param",
-                                                           dateInput("ch_date", "Add changepoints", value = NULL))
-                                          
-                          ),
-                          
-                          column(width = 6,uiOutput("ch_points"))
-                          ),
-                          
-                          ## plot/results tabs --------------------------------
-                          fluidRow(column(width=12,
-                                          tabsetPanel(
-                                                  tabPanel("Forecast Plot",
-                                                           conditionalPanel("input.plot_btn2",
-                                                                            div(id = "output-container",
-                                                                                tags$img(src = "spinner.gif",
-                                                                                         id = "loading-spinner"),
-                                                                                plotOutput("ts_plot")))
-                                                  ),
-                                                  tabPanel("Prophet Plot Components",
-                                                           conditionalPanel("input.plot_btn2",
-                                                                            div(id = "output-container",
-                                                                                tags$img(src = "spinner.gif",
-                                                                                         id = "loading-spinner"),
-                                                                                plotOutput("prophet_comp_plot")))
-                                                  ),
-                                                  tabPanel("Forecast Results",
-                                                           uiOutput("dw_button"),
-                                                           conditionalPanel("input.plot_btn2",
-                                                                            div(id = "output-container",
-                                                                                tags$img(src = "spinner.gif",
-                                                                                         id = "loading-spinner"),
-                                                                                dataTableOutput("data")))
-                                                  )
-                                          )
-                          )
-                          ),
-                          
-                          ## test output --------
-                          verbatimTextOutput("test")
-                          
-                  )
+        ),
+        
+        # Main panel -------------------------
+        mainPanel(
+                
+                fluidRow(
+                        ## upload file -----------------
+                        column(width = 6,
+                               fileInput("ts_file","Choose CSV File",
+                                         accept = c(
+                                                 "text/csv",
+                                                 "text/comma-separated-values,text/plain",
+                                                 ".csv"))),
+                        ## plot button -----------------
+                        column(width = 6,
+                               shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
+                                                              style = "width:80%; margin-top: 25px;"))
+                               
+                        )
+                ),
+                
+                fluidRow(column(width = 6,
+                                conditionalPanel("input.ch_points_param",
+                                                 dateInput("ch_date", "Add changepoints", value = NULL))
+                                
+                ),
+                
+                column(width = 6,uiOutput("ch_points"))
+                ),
+                
+                ## plot/results tabs --------------------------------
+                fluidRow(column(width=12,
+                                tabsetPanel(
+                                        tabPanel("Forecast Plot",
+                                                 conditionalPanel("input.plot_btn2",
+                                                                  div(id = "output-container",
+                                                                      tags$img(src = "spinner.gif",
+                                                                               id = "loading-spinner"),
+                                                                      plotOutput("ts_plot")))
+                                        ),
+                                        tabPanel("Prophet Plot Components",
+                                                 conditionalPanel("input.plot_btn2",
+                                                                  div(id = "output-container",
+                                                                      tags$img(src = "spinner.gif",
+                                                                               id = "loading-spinner"),
+                                                                      plotOutput("prophet_comp_plot")))
+                                        ),
+                                        tabPanel("Forecast Results",
+                                                 uiOutput("dw_button"),
+                                                 conditionalPanel("input.plot_btn2",
+                                                                  div(id = "output-container",
+                                                                      tags$img(src = "spinner.gif",
+                                                                               id = "loading-spinner"),
+                                                                      dataTableOutput("data")))
+                                        )
+                                )
+                )
+                ),
+                
+                ## test output --------
+                verbatimTextOutput("test")
+                
+        )
         )
 )
 
