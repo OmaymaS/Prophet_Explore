@@ -131,7 +131,7 @@ ui <- fluidPage(
                 fluidRow(column(width=12,
                                 tabsetPanel(
                                         tabPanel("Forecast Plot",
-                                                 conditionalPanel("output.logistic_check=='no_error'",
+                                                 conditionalPanel("output.logistic_check=='no_error' && input.plot_btn2",
                                                                   div(id = "output-container1",
                                                                       tags$img(src = "spinner.gif",
                                                                                id = "loading-spinner"))),
@@ -206,7 +206,17 @@ server <- function(input, output, session) {
                 
                 file_in <- input$ts_file
                 
-                read.csv(file_in$datapath, header = T) %>% 
+                # read csv
+                df <- read.csv(file_in$datapath, header = T) 
+                
+                # validate input df names 
+                validate(
+                        need( try("ds" %in% names(df) & "y" %in% names(df)),
+                              "Input dataframe should have at least two columns names (ds & y)")
+                        )
+                
+                # return df
+                df %>% 
                         mutate(y = log(y))
         })
         
@@ -265,12 +275,12 @@ server <- function(input, output, session) {
         
         
         output$logistic_check <- reactive({
-                req(dat())
+                # req(dat())
                 if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
                 {
                         return("error")
                 }
-                else
+                else 
                         return("no_error")
         })
         
@@ -282,13 +292,17 @@ server <- function(input, output, session) {
                     input$holidays_scale, input$mcmc.samples,
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
+        
+                
                 
                 if(input$growth == "logistic"){
                         validate(
                                 need(try("cap" %in% names(dat())),
-                                     "Note: for a logistic 'growth', the input dataframe must have a column cap that specifies the capacity at each ds."))
+                                     "Note: for logistic 'growth', the input dataframe must have a column 'cap' that specifies the capacity at each ds."))
     
                 }
+                
+                
                 
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
