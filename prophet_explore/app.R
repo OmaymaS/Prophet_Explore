@@ -23,8 +23,14 @@ ui <- fluidPage(
                  tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
                  HTML("; an open source software released by Facebook's Core Data Science team."),
                  tags$br(),
-                 HTML("To explore: upload your data in the right format, tune the parameters, then press 'Fit Prophet Model and Plot'.")),
-        tags$br(),
+                 tags$br(),
+                 HTML("<b>To explore</b>: 
+                        <ul> 
+                        <li>Upload your data in the right format <i>(dataframe with at least two columns 'ts' & 'y')</i></li>
+                        <li>Tune the parameters</li>
+                        <li>Press 'Fit Prophet Model and Plot'</li>
+                        </ul>.")),
+        # tags$br(),
         
         # Sidebar -------------------------------------
         fluidPage(sidebarPanel(width=3,
@@ -230,7 +236,8 @@ server <- function(input, output, session) {
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
-                req(dat(),
+                req(dat(), 
+                    # ("ds" %in% dat()), "y" %in% names(dat()),
                     input$n.changepoints,
                     input$seasonality_scale, input$changepoint_scale,
                     input$holidays_scale, input$mcmc.samples,
