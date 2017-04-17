@@ -409,11 +409,11 @@ server <- function(input, output, session) {
                 textOutput("")
         })
         # 
-        # ## error msg2 ------------------------
-        # output$msg2 <- renderUI({
-        #         req(prophet_model())
-        #         textOutput("")
-        # })
+        ## error msg2 ------------------------
+        output$msg2 <- renderUI({
+                req(prophet_model())
+                textOutput("")
+        })
         ## output tes --------------
         # output$test <- renderPrint({
         #         # logistic_check()
