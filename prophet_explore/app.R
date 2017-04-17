@@ -1,4 +1,3 @@
-
 library(shiny)
 library(dplyr)
 library(prophet)
@@ -6,7 +5,6 @@ library(ggplot2)
 library(DT)
 library(shinythemes)
 library(shinyjs)
-
 
 # UI ------------------------------
 ui <- fluidPage(
@@ -43,9 +41,6 @@ ui <- fluidPage(
                                                 radioButtons("growth","",
                                                              c('linear','logistic'), inline = TRUE),
                                                 
-                                                ### parameter: fit
-                                                # checkboxInput("fit", "fit", value = TRUE),
-                                                
                                                 ### parameter: yearly.seasonality
                                                 checkboxInput("yearly","yearly.seasonality", value = TRUE),
                                                 
@@ -68,11 +63,8 @@ ui <- fluidPage(
                                                 
                                                 ### parameter: interval.width
                                                 numericInput("interval.width", "interval.width", value= 0.8, step = 0.1),
-                                                
                                                 ### parameter: uncertainty.samples
                                                 numericInput("uncertainty.samples","uncertainty.samples", value = 1000),
-                                                
-                                                
                                                 ### parameter: holidays
                                                 h5(tags$b("holidays (optional)")),
                                                 
@@ -142,19 +134,20 @@ ui <- fluidPage(
                                                                       tags$img(src = "spinner.gif",
                                                                                id = "loading-spinner"),
                                                                       plotOutput("ts_plot")
-                                                                      )
                                                                   )
+                                                 )
                                         ),
                                         tabPanel("Prophet Plot Components",
                                                  # output.logistic_check=='no_error'
                                                  conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container2",
                                                                       tags$img(src = "spinner.gif",
-                                                                               id = "loading-spinner"))),
+                                                                               id = "loading-spinner"),
                                                                       plotOutput("prophet_comp_plot")
-                                                                  # )
-                                                 # )
+                                                                  )
+                                                 )
                                         ),
+                                        
                                         tabPanel("Forecast Results",
                                                  conditionalPanel("output.data",
                                                                   uiOutput("dw_button")
@@ -164,10 +157,9 @@ ui <- fluidPage(
                                                  conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container3",
                                                                       tags$img(src = "spinner.gif",
-                                                                               id = "loading-spinner"))),
-                                                                      dataTableOutput("data")
-                                                                  #     )
-                                                                  # )
+                                                                               id = "loading-spinner"),
+                                                                      dataTableOutput("data")))
+                                                 
                                         )
                                 )
                 )
@@ -175,7 +167,6 @@ ui <- fluidPage(
                 
                 ## test output --------
                 verbatimTextOutput("test")
-                # uiOutput("logistic_check")
                 
         )
         )
@@ -208,7 +199,7 @@ server <- function(input, output, session) {
                 validate(
                         need( try("ds" %in% names(df) & "y" %in% names(df)),
                               "Error: Input dataframe should have at least two columns named (ds & y)")
-                        )
+                )
                 # return df
                 df %>% 
                         mutate(y = log(y))
@@ -225,9 +216,9 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
-
+        
         ## logistic_check -------------------
-       logistic_check <- eventReactive(input$plot_btn2, {
+        logistic_check <- eventReactive(input$plot_btn2, {
                 # req(dat())
                 if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
                 {
@@ -245,16 +236,16 @@ server <- function(input, output, session) {
                     input$holidays_scale, input$mcmc.samples,
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
-        
+                
                 
                 
                 if(input$growth == "logistic"){
                         validate(
                                 need(try("cap" %in% names(dat())),
                                      "Error: for logistic 'growth', the input dataframe must have a column 'cap' that specifies the capacity at each 'ds'."))
-    
+                        
                 }
-
+                
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
                 # {
@@ -353,7 +344,7 @@ server <- function(input, output, session) {
                 req(prophet_model())
                 textOutput("")
         })
-        ## output tes --------------
+        ## output test --------------
         # output$test <- renderPrint({
         #         # logistic_check()
         #         # paste0("msg:",prophet_model())
