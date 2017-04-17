@@ -96,6 +96,7 @@ ui <- fluidPage(
                                                 ### parameter: freq
                                                 selectInput("freq","freq",
                                                             choices = c('day', 'week', 'month', 'quarter','year')),
+                                                
                                                 ### parameter: include_history
                                                 checkboxInput("include_history","include_history", value = TRUE)
                                        ))
@@ -104,7 +105,6 @@ ui <- fluidPage(
         
         # Main panel -------------------------
         mainPanel(
-                
                 fluidRow(
                         ## upload file -----------------
                         column(width = 6,
@@ -145,7 +145,11 @@ ui <- fluidPage(
                                                                       plotOutput("prophet_comp_plot")))
                                         ),
                                         tabPanel("Forecast Results",
-                                                 uiOutput("dw_button"),
+                                                 conditionalPanel("output.data",
+                                                                  uiOutput("dw_button")
+                                                                  ),
+                                                 
+                                                 # uiOutput("dw_button"),
                                                  conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container",
                                                                       tags$img(src = "spinner.gif",
@@ -267,9 +271,8 @@ server <- function(input, output, session) {
                                 need(try("cap" %in% names(dat())),
                                      "Note: for a logistic 'growth', the input dataframe must have a column cap that specifies the capacity at each ds."))
                         print("here")
-                        
                 }
-                print("here")
+                
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
                 # {
@@ -322,7 +325,6 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                # print(length(forecast()))
                 req(prophet_model(), forecast())
                 
                 g <- plot(prophet_model(), forecast())
