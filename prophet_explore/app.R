@@ -195,18 +195,6 @@ server <- function(input, output, session) {
                 reactive(values$val)
         }
         
-        # last n reactive --------------------
-        # Lastn <- function(signal,init=list(),n=2){
-        #         rv <- reactiveValues(acc = init)
-        # 
-        #         observe({
-        #                 s <- signal()
-        #                 isolate(rv$acc <- c(rv$acc[2:n],list(s)))
-        # 
-        #         })
-        #         reactive(rv$acc)
-        # }
-        
         ## read csv file data----------
         dat <- reactive({
                 req(input$ts_file)
@@ -221,7 +209,6 @@ server <- function(input, output, session) {
                         need( try("ds" %in% names(df) & "y" %in% names(df)),
                               "Error: Input dataframe should have at least two columns named (ds & y)")
                         )
-                
                 # return df
                 df %>% 
                         mutate(y = log(y))
