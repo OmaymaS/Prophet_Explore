@@ -42,7 +42,7 @@ ui <- fluidPage(
                                                 
                                                 radioButtons("growth","",
                                                              c('linear','logistic'), inline = TRUE),
-                                
+                                                
                                                 ### parameter: fit
                                                 # checkboxInput("fit", "fit", value = TRUE),
                                                 
@@ -117,51 +117,58 @@ ui <- fluidPage(
                         column(width = 6,
                                shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model & Plot",
                                                               style = "width:80%; margin-top: 25px;")))
-                        ),
+                ),
                 
                 fluidRow(
                         column(width = 12
-                                # uiOutput("ch_points", style = "width:100")
-                                # conditionalPanel("input.ch_points_param",
-                                #                  dateInput("ch_date", "Add changepoints", value = NULL))
-                               )
-                        ),
+                               # uiOutput("ch_points", style = "width:100")
+                               # conditionalPanel("input.ch_points_param",
+                               #                  dateInput("ch_date", "Add changepoints", value = NULL))
+                        )
+                ),
                 
                 ## plot/results tabs --------------------------------
                 fluidRow(column(width=12,
                                 tabsetPanel(
                                         tabPanel("Forecast Plot",
-                                                 conditionalPanel("input.plot_btn2",
-                                                                  div(id = "output-container",
+                                                 conditionalPanel("output.logistic_check=='no_error'",
+                                                                  div(id = "output-container1",
                                                                       tags$img(src = "spinner.gif",
-                                                                               id = "loading-spinner"),
-                                                                      plotOutput("ts_plot")))
+                                                                               id = "loading-spinner"))),
+                                                                      plotOutput("ts_plot")
+                                                                  #     )
+                                                                  # )
                                         ),
                                         tabPanel("Prophet Plot Components",
-                                                 conditionalPanel("input.plot_btn2",
-                                                                  div(id = "output-container",
+                                                 conditionalPanel("output.logistic_check=='no_error'",
+                                                                  div(id = "output-container2",
                                                                       tags$img(src = "spinner.gif",
-                                                                               id = "loading-spinner"),
-                                                                      plotOutput("prophet_comp_plot")))
+                                                                               id = "loading-spinner"))),
+                                                                      plotOutput("prophet_comp_plot")
+                                                                  # )
+                                                 # )
                                         ),
                                         tabPanel("Forecast Results",
                                                  conditionalPanel("output.data",
                                                                   uiOutput("dw_button")
-                                                                  ),
+                                                 ),
                                                  
                                                  # uiOutput("dw_button"),
-                                                 conditionalPanel("input.plot_btn2",
-                                                                  div(id = "output-container",
+                                                 conditionalPanel("output.logistic_check=='no_error'",
+                                                                  div(id = "output-container3",
                                                                       tags$img(src = "spinner.gif",
-                                                                               id = "loading-spinner"),
-                                                                      dataTableOutput("data")))
+                                                                               id = "loading-spinner"))),
+                                                                      dataTableOutput("data")
+                                                                  #     )
+                                                                  # )
                                         )
                                 )
                 )
                 ),
                 
                 ## test output --------
-                verbatimTextOutput("test")
+                verbatimTextOutput("test"),
+                uiOutput("logistic_check")
                 
         )
         )
@@ -255,7 +262,17 @@ server <- function(input, output, session) {
         #                         
         #         }
         # })
-
+        
+        
+        output$logistic_check <- reactive({
+                req(dat())
+                if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
+                {
+                        return("error")
+                }
+                else
+                        return("no_error")
+        })
         
         ## create prophet model -----------
         prophet_model <- eventReactive(input$plot_btn2,{
@@ -270,30 +287,30 @@ server <- function(input, output, session) {
                         validate(
                                 need(try("cap" %in% names(dat())),
                                      "Note: for a logistic 'growth', the input dataframe must have a column cap that specifies the capacity at each ds."))
-                        print("here")
+    
                 }
                 
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
                 # {
-                        kk <- prophet(dat(),
-                                      growth = input$growth,
-                                      changepoints = NULL,
-                                      n.changepoints = input$n.changepoints,
-                                      yearly.seasonality = input$yearly,
-                                      weekly.seasonality = input$monthly,
-                                      holidays = holidays_upload(),
-                                      seasonality.prior.scale = input$seasonality_scale,
-                                      changepoint.prior.scale = input$changepoint_scale,
-                                      holidays.prior.scale = input$holidays_scale,
-                                      mcmc.samples = input$mcmc.samples,
-                                      interval.width = input$interval.width,
-                                      uncertainty.samples = input$uncertainty.samples,
-                                      fit = T)
-                        # print(kk$changepoints)
-                        
-                        return(kk)
-                        
+                kk <- prophet(dat(),
+                              growth = input$growth,
+                              changepoints = NULL,
+                              n.changepoints = input$n.changepoints,
+                              yearly.seasonality = input$yearly,
+                              weekly.seasonality = input$monthly,
+                              holidays = holidays_upload(),
+                              seasonality.prior.scale = input$seasonality_scale,
+                              changepoint.prior.scale = input$changepoint_scale,
+                              holidays.prior.scale = input$holidays_scale,
+                              mcmc.samples = input$mcmc.samples,
+                              interval.width = input$interval.width,
+                              uncertainty.samples = input$uncertainty.samples,
+                              fit = T)
+                # print(kk$changepoints)
+                
+                return(kk)
+                
                 # } else
                 #         return(p_model())
                 
@@ -322,6 +339,13 @@ server <- function(input, output, session) {
         
         ## dup reactive --------------
         p_forecast <- duplicatedRecative(forecast)
+        
+        ## spinner img -------
+        output$spinner_img <- renderUI({
+                tags$div(
+                        tags$img(src = "spinner.gif")
+                )
+        })
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
@@ -361,13 +385,14 @@ server <- function(input, output, session) {
                 }
         )
         
-
+        
         ## output tes --------------
-        output$test <- renderPrint({
-                # paste0("msg:",prophet_model()) 
-                # forecast() %>% length()
-        })
-
+        # output$test <- renderPrint({
+        #         # logistic_check()
+        #         # paste0("msg:",prophet_model()) 
+        #         # forecast() %>% length()
+        # })
+        
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
         #         req(prophet_model())
@@ -392,7 +417,7 @@ server <- function(input, output, session) {
         #                             value=c(input$ch_points_param,
         #                                     as.character(as.Date(as.numeric(input$ch_date),
         #                                                          origin="1970-01-01"))))
-
+        
         
         # selected Changepoints ----------------
         # output$ch_points <- renderUI({
