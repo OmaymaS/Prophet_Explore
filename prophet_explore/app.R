@@ -421,63 +421,6 @@ server <- function(input, output, session) {
         #         # forecast() %>% length()
         # })
         
-        ## selected Changepoints ----------------
-        # output$ch_points <- renderUI({
-        #         req(prophet_model())
-        #         textAreaInput("ch_points_param","Selected Changepoints",
-        #                       value=paste(prophet_model()$changepoints,collapse=", "))
-        # })
-        
-        ## changepoints_vector -------------------------
-        # changepoints_vector <- reactive({
-        #         req(input$ch_points_param)
-        #         ch <- input$ch_points_param %>% 
-        #                 strsplit(",") %>% 
-        #                 unlist 
-        #         
-        #         if(length(ch)==0) NULL
-        #         else ch
-        # })
-        
-        # update textArea ------------------------
-        # observeEvent(input$ch_date,{
-        #         updateTextAreaInput(session,"ch_points_param",
-        #                             value=c(input$ch_points_param,
-        #                                     as.character(as.Date(as.numeric(input$ch_date),
-        #                                                          origin="1970-01-01"))))
-        
-        
-        # selected Changepoints ----------------
-        # output$ch_points <- renderUI({
-        #         req(prophet_model())
-        #         
-        #         selectInput("ch_points_param","Selected Changepoints",
-        #                     choices = prophet_model()$changepoints,
-        #                     selected = prophet_model()$changepoints,
-        #                     multiple = T,
-        #                     selectize = T)
-        # })
-        
-        ## changepoints_vector -------------------------
-        # changepoints_vector <- reactive({
-        #         req(input$ch_points_param)
-        #         ch <- input$ch_points_param %>% 
-        #                 strsplit(",") %>% 
-        #                 unlist 
-        #         
-        #         if(length(ch)==0) NULL
-        #         else ch
-        # })
-        
-        # update textArea ------------------------
-        # observeEvent(input$ch_date,{
-        #         updateTextAreaInput(session,"ch_points_param",
-        #                             value=c(input$ch_points_param,
-        #                                     as.character(as.Date(as.numeric(input$ch_date),
-        #                                                          origin="1970-01-01"))))
-        # })
-        
-        
 }
 
 # Run the application ---------------------------
