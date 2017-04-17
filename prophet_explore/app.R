@@ -365,16 +365,12 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                # req(forecast())
-                
                 g <- plot(prophet_model(), forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
-                # req(forecast())
-                
                 prophet_plot_components(prophet_model(),forecast())
         })
         
