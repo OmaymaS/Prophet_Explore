@@ -359,13 +359,6 @@ server <- function(input, output, session) {
         ## dup reactive --------------
         p_forecast <- duplicatedRecative(forecast)
         
-        ## spinner img -------
-        output$spinner_img <- renderUI({
-                tags$div(
-                        tags$img(src = "spinner.gif")
-                )
-        })
-        
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
                 req(logistic_check()!="error")
