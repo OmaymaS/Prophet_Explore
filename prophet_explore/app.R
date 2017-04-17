@@ -238,49 +238,8 @@ server <- function(input, output, session) {
                 else h <- read.csv(input$holidays_file$datapath, header = T) 
                 return(h)
         })
-        
-        # prophet arguements ----------------------
-        # prophet_args <- reactive({
-        #         list(dat = dat(),
-        #              growth = input$growth,
-        #              changepoints = NULL,
-        #              n.changepoints = input$n.changepoints,
-        #              yearly.seasonality = input$yearly,
-        #              weekly.seasonality = input$monthly,
-        #              holidays = holidays_upload(),
-        #              seasonality.prior.scale = input$seasonality_scale,
-        #              changepoint.prior.scale = input$changepoint_scale,
-        #              holidays.prior.scale = input$holidays_scale,
-        #              mcmc.samples = input$mcmc.samples,
-        #              interval.width = input$interval.width,
-        #              uncertainty.samples = input$uncertainty.samples,
-        #              fit = input$fit)
-        # })
-        
-        
-        ## reactiveValues to hold last 2 values of dat() ------------------------
-        # rv <- reactiveValues(dat_last = list(data.frame(),data.frame()),
-        #                      arg_last = list(first=list(),second=list()))
-        # 
-        # observeEvent(input$plot_btn2,{
-        #         if(length(rv$dat_last[[1]])==0 & length(rv$dat_last[[2]])==0){
-        #                 rv$dat_last[[2]] <- dat()
-        #                 rv$arg_last$second <- prophet_args()
-        #                 
-        #         }
-        #                 
-        #         
-        #         else{
-        #                 rv$dat_last[[1]] <- rv$dat_last[[2]]
-        #                 rv$dat_last[[2]] <- dat()
-        #                 
-        #                 rv$arg_last$first <- rv$arg_last$second
-        #                 rv$arg_last$second<- prophet_args()
-        #                         
-        #         }
-        # })
-        
-        
+
+        ## logistic_check -------------------
        logistic_check <- eventReactive(input$plot_btn2, {
                 # req(dat())
                 if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
