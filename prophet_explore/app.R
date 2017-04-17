@@ -262,7 +262,14 @@ server <- function(input, output, session) {
                     input$mcmc.samples, input$interval.width,
                     input$uncertainty.samples)
                 
-                
+                if(input$growth == "logistic"){
+                        validate(
+                                need(try("cap" %in% names(dat())),
+                                     "Note: for a logistic 'growth', the input dataframe must have a column cap that specifies the capacity at each ds."))
+                        print("here")
+                        
+                }
+                print("here")
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
                 # {
@@ -306,8 +313,8 @@ server <- function(input, output, session) {
         
         ## predict future values -----------------------
         forecast <- reactive({
-                req(p_model(),p_future())
-                predict(p_model(),p_future())
+                req(prophet_model(),p_future())
+                predict(prophet_model(),p_future())
         })
         
         ## dup reactive --------------
@@ -315,6 +322,7 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
+                # print(length(forecast()))
                 req(prophet_model(), forecast())
                 
                 g <- plot(prophet_model(), forecast())
@@ -353,10 +361,11 @@ server <- function(input, output, session) {
         
 
         ## output tes --------------
-        # output$test <- renderPrint({
-        #         # input$fit
-        # })
-        # 
+        output$test <- renderPrint({
+                # paste0("msg:",prophet_model()) 
+                # forecast() %>% length()
+        })
+
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
         #         req(prophet_model())
