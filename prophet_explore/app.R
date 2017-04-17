@@ -199,29 +199,11 @@ server <- function(input, output, session) {
                 file_in <- input$ts_file
                 
                 # read csv
-                df <- read.csv(file_in$datapath, header = T) 
-                
-                # validate input df names 
-                # validate(
-                #         need( try("ds" %in% names(df) & "y" %in% names(df)),
-                #               "Invalid Input: dataframe should have at least two columns named (ds & y)")
-                # )
-                # return df
-                # df %>% 
-                #         mutate(y = log(y))
+                read.csv(file_in$datapath, header = T) 
         })
         
-        ## enable calculate button when file is uploaded ---------------------
-        # observeEvent(dat(),{
-        #         shinyjs::enable("plot_btn2")
-        # })
-        
-        # observeEvent(dat(),{
-        #         shinyjs::enable("plot_btn2")
-        # })
-        
+        ## Toggle submit button state according to data ---------------
         observe({
-                print(c("ds","y") %in% names(dat()) %>% mean ==1)
                 if(!(c("ds","y") %in% names(dat()) %>% mean ==1))
                         shinyjs::disable("plot_btn2")
                 else if(c("ds","y") %in% names(dat()) %>% mean ==1)
@@ -322,20 +304,20 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                req(logistic_check()!="error")
+                # req(logistic_check()!="error")
                 g <- plot(p_model(), forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
-                req(logistic_check()!="error")
+                # req(logistic_check()!="error")
                 prophet_plot_components(p_model(),forecast())
         })
         
         ## create datatable from forecast dataframe --------------------
         output$data <- renderDataTable({
-                req(logistic_check()!="error")
+                # req(logistic_check()!="error")
                 datatable(forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
@@ -359,19 +341,18 @@ server <- function(input, output, session) {
         
         ## error msg ------------------------
         output$msg <- renderUI({
-                req(dat())
-                textOutput("")
+                if(c("ds","y") %in% names(dat()) %>% mean !=1)
+                "Invalid Input: dataframe should have at least two columns named (ds & y)"
         })
         # 
-        ## error msg2 ------------------------
-        output$msg2 <- renderUI({
-                req(prophet_model())
-                textOutput("")
-        })
+        # error msg2 ------------------------
+        # output$msg2 <- renderUI({
+        #         if(logistic_check()=="error")
+        #         "Error"
+        # })
+        
         ## output test --------------
         # output$test <- renderPrint({
-        #         # logistic_check()
-        #         # paste0("msg:",prophet_model())
         #         # forecast() %>% length()
         # })
         
