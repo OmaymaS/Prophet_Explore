@@ -122,6 +122,9 @@ ui <- fluidPage(
                 fluidRow(column(width = 12,
                                 uiOutput("msg"))),
                 
+                fluidRow(column(width = 12,
+                                uiOutput("msg2"))),
+                
                 fluidRow(
                         column(width = 12
                                # uiOutput("ch_points", style = "width:100")
@@ -137,10 +140,10 @@ ui <- fluidPage(
                                                  conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container1",
                                                                       tags$img(src = "spinner.gif",
-                                                                               id = "loading-spinner"))),
+                                                                               id = "loading-spinner"),
                                                                       plotOutput("ts_plot")
-                                                                  #     )
-                                                                  # )
+                                                                      )
+                                                                  )
                                         ),
                                         tabPanel("Prophet Plot Components",
                                                  # output.logistic_check=='no_error'
@@ -171,8 +174,8 @@ ui <- fluidPage(
                 ),
                 
                 ## test output --------
-                verbatimTextOutput("test"),
-                uiOutput("logistic_check")
+                verbatimTextOutput("test")
+                # uiOutput("logistic_check")
                 
         )
         )
@@ -216,7 +219,7 @@ server <- function(input, output, session) {
                 # validate input df names 
                 validate(
                         need( try("ds" %in% names(df) & "y" %in% names(df)),
-                              "Input dataframe should have at least two columns names (ds & y)")
+                              "Error: Input dataframe should have at least two columns named (ds & y)")
                         )
                 
                 # return df
@@ -278,7 +281,7 @@ server <- function(input, output, session) {
         # })
         
         
-       output$logistic_check <- eventReactive(input$plot_btn2, {
+       logistic_check <- eventReactive(input$plot_btn2, {
                 # req(dat())
                 if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
                 {
@@ -365,24 +368,27 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                g <- plot(prophet_model(), forecast())
+                req(logistic_check()!="error")
+                g <- plot(p_model(), forecast())
                 g+theme_classic()
         })
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
-                prophet_plot_components(prophet_model(),forecast())
+                req(logistic_check()!="error")
+                prophet_plot_components(p_model(),forecast())
         })
         
         ## create datatable from forecast dataframe --------------------
         output$data <- renderDataTable({
-
+                req(logistic_check()!="error")
                 datatable(forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
         
         ## download button ----------------
         output$dw_button <- renderUI({
+                
                 req(forecast())
                 downloadButton('downloadData', 'Download Data',
                                style = "width:20%;
@@ -397,17 +403,23 @@ server <- function(input, output, session) {
                 }
         )
         
-        
+        ## error msg ------------------------
         output$msg <- renderUI({
                 req(dat())
                 textOutput("")
         })
+        # 
+        # ## error msg2 ------------------------
+        # output$msg2 <- renderUI({
+        #         req(prophet_model())
+        #         textOutput("")
+        # })
         ## output tes --------------
-        output$test <- renderPrint({
-                # logistic_check()
-                # paste0("msg:",prophet_model())
-                # forecast() %>% length()
-        })
+        # output$test <- renderPrint({
+        #         # logistic_check()
+        #         # paste0("msg:",prophet_model())
+        #         # forecast() %>% length()
+        # })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
