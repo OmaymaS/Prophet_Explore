@@ -119,6 +119,9 @@ ui <- fluidPage(
                                                               style = "width:80%; margin-top: 25px;")))
                 ),
                 
+                fluidRow(column(width = 12,
+                                uiOutput("msg"))),
+                
                 fluidRow(
                         column(width = 12
                                # uiOutput("ch_points", style = "width:100")
@@ -362,7 +365,7 @@ server <- function(input, output, session) {
         
         ## plot forecast -------------
         output$ts_plot <- renderPlot({
-                req(prophet_model(), forecast())
+                # req(forecast())
                 
                 g <- plot(prophet_model(), forecast())
                 g+theme_classic()
@@ -370,7 +373,7 @@ server <- function(input, output, session) {
         
         ## plot prophet components --------------
         output$prophet_comp_plot <- renderPlot({
-                req(prophet_model(), forecast())
+                # req(forecast())
                 
                 prophet_plot_components(prophet_model(),forecast())
         })
@@ -399,6 +402,10 @@ server <- function(input, output, session) {
         )
         
         
+        output$msg <- renderUI({
+                req(dat())
+                textOutput("")
+        })
         ## output tes --------------
         output$test <- renderPrint({
                 # logistic_check()
