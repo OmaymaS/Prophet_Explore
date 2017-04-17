@@ -202,18 +202,30 @@ server <- function(input, output, session) {
                 df <- read.csv(file_in$datapath, header = T) 
                 
                 # validate input df names 
-                validate(
-                        need( try("ds" %in% names(df) & "y" %in% names(df)),
-                              "Error: Input dataframe should have at least two columns named (ds & y)")
-                )
+                # validate(
+                #         need( try("ds" %in% names(df) & "y" %in% names(df)),
+                #               "Invalid Input: dataframe should have at least two columns named (ds & y)")
+                # )
                 # return df
-                df %>% 
-                        mutate(y = log(y))
+                # df %>% 
+                #         mutate(y = log(y))
         })
         
         ## enable calculate button when file is uploaded ---------------------
-        observeEvent(input$ts_file,{
-                shinyjs::enable("plot_btn2")
+        # observeEvent(dat(),{
+        #         shinyjs::enable("plot_btn2")
+        # })
+        
+        # observeEvent(dat(),{
+        #         shinyjs::enable("plot_btn2")
+        # })
+        
+        observe({
+                print(c("ds","y") %in% names(dat()) %>% mean ==1)
+                if(!(c("ds","y") %in% names(dat()) %>% mean ==1))
+                        shinyjs::disable("plot_btn2")
+                else if(c("ds","y") %in% names(dat()) %>% mean ==1)
+                        shinyjs::enable("plot_btn2")
         })
         
         ## get holidays -------------
@@ -256,7 +268,12 @@ server <- function(input, output, session) {
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
                 # {
-                kk <- prophet(dat(),
+                #
+                # mutate dataframe
+                datx <- dat() %>% 
+                        mutate(y = log(y))
+                
+                kk <- prophet(datx,
                               growth = input$growth,
                               changepoints = NULL,
                               n.changepoints = input$n.changepoints,
