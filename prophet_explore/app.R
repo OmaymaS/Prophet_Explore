@@ -131,7 +131,7 @@ ui <- fluidPage(
                 fluidRow(column(width=12,
                                 tabsetPanel(
                                         tabPanel("Forecast Plot",
-                                                 conditionalPanel("output.logistic_check=='no_error' && input.plot_btn2",
+                                                 conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container1",
                                                                       tags$img(src = "spinner.gif",
                                                                                id = "loading-spinner"))),
@@ -140,7 +140,8 @@ ui <- fluidPage(
                                                                   # )
                                         ),
                                         tabPanel("Prophet Plot Components",
-                                                 conditionalPanel("output.logistic_check=='no_error'",
+                                                 # output.logistic_check=='no_error'
+                                                 conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container2",
                                                                       tags$img(src = "spinner.gif",
                                                                                id = "loading-spinner"))),
@@ -154,7 +155,7 @@ ui <- fluidPage(
                                                  ),
                                                  
                                                  # uiOutput("dw_button"),
-                                                 conditionalPanel("output.logistic_check=='no_error'",
+                                                 conditionalPanel("input.plot_btn2",
                                                                   div(id = "output-container3",
                                                                       tags$img(src = "spinner.gif",
                                                                                id = "loading-spinner"))),
@@ -274,7 +275,7 @@ server <- function(input, output, session) {
         # })
         
         
-        output$logistic_check <- reactive({
+       output$logistic_check <- eventReactive(input$plot_btn2, {
                 # req(dat())
                 if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
                 {
@@ -298,12 +299,10 @@ server <- function(input, output, session) {
                 if(input$growth == "logistic"){
                         validate(
                                 need(try("cap" %in% names(dat())),
-                                     "Note: for logistic 'growth', the input dataframe must have a column 'cap' that specifies the capacity at each ds."))
+                                     "Error: for logistic 'growth', the input dataframe must have a column 'cap' that specifies the capacity at each 'ds'."))
     
                 }
-                
-                
-                
+
                 # if(!identical(rv$dat_last[[1]],rv$dat_last[[2]]))
                 #         
                 # {
@@ -378,7 +377,7 @@ server <- function(input, output, session) {
         
         ## create datatable from forecast dataframe --------------------
         output$data <- renderDataTable({
-                
+
                 datatable(forecast()) %>% 
                         formatRound(columns=2:17,digits=4)
         })
@@ -401,11 +400,11 @@ server <- function(input, output, session) {
         
         
         ## output tes --------------
-        # output$test <- renderPrint({
-        #         # logistic_check()
-        #         # paste0("msg:",prophet_model()) 
-        #         # forecast() %>% length()
-        # })
+        output$test <- renderPrint({
+                # logistic_check()
+                # paste0("msg:",prophet_model())
+                # forecast() %>% length()
+        })
         
         ## selected Changepoints ----------------
         # output$ch_points <- renderUI({
