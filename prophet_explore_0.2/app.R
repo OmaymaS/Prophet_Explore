@@ -195,49 +195,7 @@ ui <- dashboardPage(
                                
                                
                       )
-                      # tabPanel(title = "Plot Results", value = "panel4",
-                      #          fluidRow(
-                      #            box(width =12, 
-                      #                
-                      #                column(width = 12,
-                      #                       shinyjs::disabled(actionButton("plot_btn3", "Plot Results",
-                      #                                                      style = "width: 30%; margin-top: 25px; font-size:150%;")
-                      #                       )
-                      #                ),
-                      #                column(width = 12, HTML("<br><br>")),
-                      #                column(width=12
-                      #                       # tabsetPanel(
-                      #                       #   tabPanel("Forecast Plot",
-                      #                       #            conditionalPanel("input.plot_btn3",
-                      #                       #                             div(id = "output-container",
-                      #                       #                                 # tags$img(src = "spinner.gif",
-                      #                       #                                 #          id = "loading-spinner"),
-                      #                       #                                 plotOutput("ts_plot")
-                      #                       #                             )
-                      #                       #                             
-                      #                       #            )
-                      #                       #            # 
-                      #                       #            
-                      #                       #   ),
-                      #                       #   tabPanel("Prophet Plot Components",
-                      #                       #            # output.logistic_check=='no_error'
-                      #                       #            conditionalPanel("input.plot_btn3",
-                      #                       #                             div(id = "output-container",
-                      #                       #                                 # tags$img(src = "spinner.gif",
-                      #                       #                                 #          id = "loading-spinner"),
-                      #                       #                                 plotOutput("prophet_comp_plot"))
-                      #                       #            )
-                      #                       #   )
-                      #                       # )
-                      #                )
-                      #            ),
-                      #            
-                      #            box(width = 12,
-                      #                column(width = 2,
-                      #                       actionButton("back4", "Back",
-                      #                                    style = "width:100%; font-size:200%"))
-                      #            )
-                      #          ))
+                      
           )
       )
       
