@@ -9,8 +9,7 @@ library(ggplot2)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Prophet Explorer"),
-  
-  
+
   dashboardSidebar(
   ),
   
@@ -38,7 +37,8 @@ ui <- dashboardPage(
                                                            ".csv"))),
                                         column(width = 12,
                                                tableOutput("uploaded_data")),
-                                        column(width = 4, offset = 4)
+                                        column(width = 12,
+                                               uiOutput("msg"))
                                  ),
                                  ## upload holidays -----------------
                                  column(width = 6,
@@ -114,11 +114,6 @@ ui <- dashboardPage(
                                                ### parameter: include_history
                                                checkboxInput("include_history","include_history", value = TRUE))
                                  )
-                                 
-                                 
-                                 
-                                 
-                                 # )
                                )
                                ,
                                ## Back/Next 2 --------------------------
@@ -164,10 +159,8 @@ ui <- dashboardPage(
                                                                    #          id = "loading-spinner"),
                                                                    plotOutput("ts_plot")
                                                                )
-                                                               
                                               )
-                                              # 
-                                              
+                                   
                                      ),
                                      tabPanel("Prophet Plot Components",
                                               # output.logistic_check=='no_error'
@@ -179,9 +172,6 @@ ui <- dashboardPage(
                                               )
                                      )
                                    )))
-                               # )
-                               # )
-                               
                                ,
                                
                                fluidRow(
@@ -189,8 +179,6 @@ ui <- dashboardPage(
                                         actionButton("back3", "Back",
                                                      style = "width:100%; font-size:200%"))
                                  )
-                               
-                               
                       )
                       
           )
@@ -401,6 +389,12 @@ server <- function(input, output, session) {
   output$prophet_comp_plot <- renderPlot({
     # req(logistic_check()!="error")
     prophet_plot_components(p_model(), forecast())
+  })
+  
+  ## error msg ------------------------
+  output$msg <- renderUI({
+    if(c("ds","y") %in% names(dat()) %>% mean !=1)
+      "Invalid Input: dataframe should have at least two columns named (ds & y)"
   })
   
 }
