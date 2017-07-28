@@ -9,182 +9,229 @@ library(ggplot2)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Prophet Explorer"),
-
+  
   dashboardSidebar(
+    sidebarMenu(
+      menuItem("About", tabName = "About"),
+      menuItem("Prophet Explorer App", tabName = "Prophet")
+    )
   ),
   
   dashboardBody(
     ## include css file --------------------
     tags$head(tags$style(includeCSS("./www/mycss.css"))),
+    ## include script ----------------------
+    tags$script(HTML("var openTab = function(tabName){$('a', $('.sidebar')).each(function() {
+                     if(this.getAttribute('data-value') == tabName) {
+                     this.click()
+                     };
+                     });
+                     }
+                     ")),
+    
     ## use shinyjs -----------------------
     useShinyjs(),
-    
-    fluidRow(
-      box(width = 12,
-          tabsetPanel(id = "inTabset",
-                      ## TAB 1 -------------
-                      tabPanel(title = "Upload Data", value = "panel1",
-                               fluidRow(br()),
-                               fluidRow(
-                                 ## upload main dataset -----------------
-                                 column(width = 6,
-                                        column(width = 12,
-                                               tags$h4("Main Dataset"),
-                                               fileInput("ts_file","Upload CSV File",
-                                                         accept = c(
-                                                           "text/csv",
-                                                           "text/comma-separated-values,text/plain",
-                                                           ".csv"))),
-                                        column(width = 12,
-                                               tableOutput("uploaded_data")),
-                                        column(width = 12,
-                                               uiOutput("msg"))
-                                 ),
-                                 ## upload holidays -----------------
-                                 column(width = 6,
-                                        column(width = 12,
-                                               tags$h4("Holidays (Optional)"),
-                                               fileInput("holidays_file","Upload CSV File",
-                                                         accept = c(
-                                                           "text/csv",
-                                                           "text/comma-separated-values,text/plain",
-                                                           ".csv"))))
-                                 
-                               ),
-                               ## Next 1 ---------------
-                               fluidRow(
-                                 # box(width = 12,
-                                 column(width = 2, offset = 10,
-                                        shinyjs::disabled(actionButton("next1", "Next",
-                                                                       style = "width:100%; font-size:200%"))))
-                               # )
-                      ),
-                      ## TAB 2 -------------
-                      tabPanel(title = "Set Parameters", value = "panel2",
-                               fluidRow(
-                                 # box(width = 12,
-                                 ## prophet parameters --------------------
-                                 column(width = 8,
-                                        column(width = 8, offset = 2,
-                                               tags$h3("Prophet Parameters")),
-                                        column(width = 6,
-                                               
-                                               radioButtons("growth","growth",
-                                                            c('linear','logistic'), inline = TRUE),
-                                               
-                                               ### parameter: yearly.seasonality
-                                               checkboxInput("yearly","yearly.seasonality", value = TRUE),
-                                               
-                                               ### parameter: weekly.seasonality 
-                                               checkboxInput("monthly","weekly.seasonality", value = TRUE),
-                                               ### parameter: n.changepoints
-                                               numericInput("n.changepoints","n.changepoints", value = 25),
-                                               
-                                               ### parameter: seasonality.prior.scale
-                                               numericInput("seasonality_scale","seasonality.prior.scale", value = 10),
-                                               
-                                               ### parameter: changepoint.prior.scale
-                                               numericInput("changepoint_scale","changepoint.prior.scale", value = 0.05, step = 0.01)),
-                                        column(width = 6,
-                                               
-                                               ### parameter: holidays.prior.scale
-                                               numericInput("holidays_scale","holidays.prior.scale", value = 10),
-                                               
-                                               ### parameter: mcmc.samples
-                                               numericInput("mcmc.samples", "mcmc.samples", value = 0),
-                                               
-                                               ### parameter: interval.width
-                                               numericInput("interval.width", "interval.width", value= 0.8, step = 0.1),
-                                               ### parameter: uncertainty.samples
-                                               numericInput("uncertainty.samples","uncertainty.samples", value = 1000))
-                                        
-                                 ),
-                                 ## predict parameters --------------------
-                                 column(width = 4,
-                                        column(width = 12,
-                                               tags$h3("Predict Parameters")),
-                                        column(width = 12,
-                                               ### paramater: periods
-                                               numericInput("periods","periods",value=365),
-                                               
-                                               ### parameter: freq
-                                               selectInput("freq","freq",
-                                                           choices = c('day', 'week', 'month', 'quarter','year')),
-                                               
-                                               ### parameter: include_history
-                                               checkboxInput("include_history","include_history", value = TRUE))
-                                 )
-                               )
-                               ,
-                               ## Back/Next 2 --------------------------
-                               fluidRow(
-                                 column(width = 2, 
-                                        actionButton("back2", "Back",
-                                                     style = "width:100%; font-size:200%")),
-                                 column(width = 2, offset = 8,
-                                        actionButton("next2", "Next",
-                                                     style = "width:100%; font-size:200%"))
-                               )
-                      ),
-                      ## TAB 3 -------------
-                      tabPanel(title = "Fit Model", value = "panel3", 
-                               fluidRow(
-                                 # box(width = 12, 
-                                 column(width = 12,
-                                        shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model",
-                                                                       style = "width:30%; margin-top: 25px; margin-bottom: 50px; font-size:150%; ")
-                                        )
-                                 )
-                               ),
-                               # column(width = 12, HTML("<br><br>")),
-                               fluidRow(
-                                 box(width = 12, collapsible = T, title = "Results",
-                                     conditionalPanel("input.plot_btn2",
-                                                      div(id = "output-container3",
-                                                          tags$img(src = "spinner.gif",
-                                                                   id = "loading-spinner"),
-                                                          DT::dataTableOutput("data"))),
-                                     conditionalPanel("output.data",
-                                                      uiOutput("dw_button")
-                                     )
-                                 )
-                                 ),
-                                 fluidRow( 
-                                   box(width = 12, collapsible = T, title = "Plots",
-                                   tabsetPanel(
-                                     tabPanel("Forecast Plot",
-                                              conditionalPanel("input.plot_btn2",
-                                                               div(id = "output-container",
-                                                                   # tags$img(src = "spinner.gif",
-                                                                   #          id = "loading-spinner"),
-                                                                   plotOutput("ts_plot")
-                                                               )
-                                              )
-                                   
-                                     ),
-                                     tabPanel("Prophet Plot Components",
-                                              # output.logistic_check=='no_error'
-                                              conditionalPanel("input.plot_btn2",
-                                                               div(id = "output-container",
-                                                                   # tags$img(src = "spinner.gif",
-                                                                   #          id = "loading-spinner"),
-                                                                   plotOutput("prophet_comp_plot"))
-                                              )
-                                     )
-                                   )))
-                               ,
-                               
-                               fluidRow(
-                                 column(width = 2, 
-                                        actionButton("back3", "Back",
-                                                     style = "width:100%; font-size:200%"))
-                                 )
-                      )
-                      
-          )
-      )
-      
-    )
+    ## Tab Items ---------------------------
+    tabItems(
+      tabItem(tabName = "About",
+              fluidRow(
+                box(width = 12,
+                tags$h1("About"),
+                helpText(tags$a(href="https://github.com/OmaymaS/Prophet_Explore","Prophet Explore "),
+                         HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
+                         tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
+                         HTML("; an open source software released by Facebook's Core Data Science team."),
+                         tags$br(),
+                         tags$br(),
+                         HTML("<b>To explore</b>: 
+                              <ul> 
+                              <li>Upload your data in the right format <i>(dataframe with at least two columns 'ts' & 'y')</i></li>
+                              <li>Tune the parameters</li>
+                              <li>Press 'Fit Prophet Model'</li>
+                              </ul>.")),
+                a("Get Started!", onclick = "openTab('Prophet')",
+                  style="cursor: pointer; font-size: 300%;")
+                )
+                
+                # infoBox(
+                #   tags$p("Get Started",
+                #          style = "font-size: 150%"),
+                #   a("Start", onclick = "openTab('Prophet')",
+                #     style="cursor: pointer; font-size: 100%;"),
+                #   icon=icon("keyboard-o"),
+                #   color="aqua",
+                #   width = 6,
+                #   fill=T
+                # )
+              )
+              ),
+      tabItem(tabName = "Prophet",
+              fluidRow(
+                box(width = 12,
+                    tabsetPanel(id = "inTabset",
+                                ## TAB 1 -------------
+                                tabPanel(title = "Upload Data", value = "panel1",
+                                         fluidRow(br()),
+                                         fluidRow(
+                                           ## upload main dataset -----------------
+                                           column(width = 6,
+                                                  column(width = 12,
+                                                         tags$h4("Main Dataset"),
+                                                         fileInput("ts_file","Upload CSV File",
+                                                                   accept = c(
+                                                                     "text/csv",
+                                                                     "text/comma-separated-values,text/plain",
+                                                                     ".csv"))),
+                                                  column(width = 12,
+                                                         tableOutput("uploaded_data")),
+                                                  column(width = 12,
+                                                         uiOutput("msg"))
+                                           ),
+                                           ## upload holidays -----------------
+                                           column(width = 6,
+                                                  column(width = 12,
+                                                         tags$h4("Holidays (Optional)"),
+                                                         fileInput("holidays_file","Upload CSV File",
+                                                                   accept = c(
+                                                                     "text/csv",
+                                                                     "text/comma-separated-values,text/plain",
+                                                                     ".csv"))))
+                                           
+                                         ),
+                                         ## Next 1 ---------------
+                                         fluidRow(
+                                           # box(width = 12,
+                                           column(width = 2, offset = 10,
+                                                  shinyjs::disabled(actionButton("next1", "Next",
+                                                                                 style = "width:100%; font-size:200%"))))
+                                         # )
+                                ),
+                                ## TAB 2 -------------
+                                tabPanel(title = "Set Parameters", value = "panel2",
+                                         fluidRow(
+                                           # box(width = 12,
+                                           ## prophet parameters --------------------
+                                           column(width = 8,
+                                                  column(width = 8, offset = 2,
+                                                         tags$h3("Prophet Parameters")),
+                                                  column(width = 6,
+                                                         
+                                                         radioButtons("growth","growth",
+                                                                      c('linear','logistic'), inline = TRUE),
+                                                         
+                                                         ### parameter: yearly.seasonality
+                                                         checkboxInput("yearly","yearly.seasonality", value = TRUE),
+                                                         
+                                                         ### parameter: weekly.seasonality 
+                                                         checkboxInput("monthly","weekly.seasonality", value = TRUE),
+                                                         ### parameter: n.changepoints
+                                                         numericInput("n.changepoints","n.changepoints", value = 25),
+                                                         
+                                                         ### parameter: seasonality.prior.scale
+                                                         numericInput("seasonality_scale","seasonality.prior.scale", value = 10),
+                                                         
+                                                         ### parameter: changepoint.prior.scale
+                                                         numericInput("changepoint_scale","changepoint.prior.scale", value = 0.05, step = 0.01)),
+                                                  column(width = 6,
+                                                         
+                                                         ### parameter: holidays.prior.scale
+                                                         numericInput("holidays_scale","holidays.prior.scale", value = 10),
+                                                         
+                                                         ### parameter: mcmc.samples
+                                                         numericInput("mcmc.samples", "mcmc.samples", value = 0),
+                                                         
+                                                         ### parameter: interval.width
+                                                         numericInput("interval.width", "interval.width", value= 0.8, step = 0.1),
+                                                         ### parameter: uncertainty.samples
+                                                         numericInput("uncertainty.samples","uncertainty.samples", value = 1000))
+                                                  
+                                           ),
+                                           ## predict parameters --------------------
+                                           column(width = 4,
+                                                  column(width = 12,
+                                                         tags$h3("Predict Parameters")),
+                                                  column(width = 12,
+                                                         ### paramater: periods
+                                                         numericInput("periods","periods",value=365),
+                                                         
+                                                         ### parameter: freq
+                                                         selectInput("freq","freq",
+                                                                     choices = c('day', 'week', 'month', 'quarter','year')),
+                                                         
+                                                         ### parameter: include_history
+                                                         checkboxInput("include_history","include_history", value = TRUE))
+                                           )
+                                         )
+                                         ,
+                                         ## Back/Next 2 --------------------------
+                                         fluidRow(
+                                           column(width = 2, 
+                                                  actionButton("back2", "Back",
+                                                               style = "width:100%; font-size:200%")),
+                                           column(width = 2, offset = 8,
+                                                  actionButton("next2", "Next",
+                                                               style = "width:100%; font-size:200%"))
+                                         )
+                                ),
+                                ## TAB 3 -------------
+                                tabPanel(title = "Fit Model", value = "panel3", 
+                                         fluidRow(
+                                           # box(width = 12, 
+                                           column(width = 12,
+                                                  shinyjs::disabled(actionButton("plot_btn2", "Fit Prophet Model",
+                                                                                 style = "width:30%; margin-top: 25px; margin-bottom: 50px; font-size:150%; ")
+                                                  )
+                                           )
+                                         ),
+                                         # column(width = 12, HTML("<br><br>")),
+                                         fluidRow(
+                                           box(width = 12, collapsible = T, title = "Results",
+                                               conditionalPanel("input.plot_btn2",
+                                                                div(id = "output-container3",
+                                                                    tags$img(src = "spinner.gif",
+                                                                             id = "loading-spinner"),
+                                                                    DT::dataTableOutput("data"))),
+                                               conditionalPanel("output.data",
+                                                                uiOutput("dw_button")
+                                               )
+                                           )
+                                         ),
+                                         fluidRow( 
+                                           box(width = 12, collapsible = T, title = "Plots",
+                                               tabsetPanel(
+                                                 tabPanel("Forecast Plot",
+                                                          conditionalPanel("input.plot_btn2",
+                                                                           div(id = "output-container",
+                                                                               # tags$img(src = "spinner.gif",
+                                                                               #          id = "loading-spinner"),
+                                                                               plotOutput("ts_plot")
+                                                                           )
+                                                          )
+                                                          
+                                                 ),
+                                                 tabPanel("Prophet Plot Components",
+                                                          # output.logistic_check=='no_error'
+                                                          conditionalPanel("input.plot_btn2",
+                                                                           div(id = "output-container",
+                                                                               # tags$img(src = "spinner.gif",
+                                                                               #          id = "loading-spinner"),
+                                                                               plotOutput("prophet_comp_plot"))
+                                                          )
+                                                 )
+                                               )))
+                                         ,
+                                         
+                                         fluidRow(
+                                           column(width = 2, 
+                                                  actionButton("back3", "Back",
+                                                               style = "width:100%; font-size:200%"))
+                                         )
+                                )
+                                
+                    )
+                )
+                
+              )))
   )
 )
 
