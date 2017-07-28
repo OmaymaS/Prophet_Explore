@@ -188,9 +188,6 @@ ui <- dashboardPage(
                                  column(width = 2, 
                                         actionButton("back3", "Back",
                                                      style = "width:100%; font-size:200%"))
-                                 # column(width = 2, offset = 8,
-                                 #        actionButton("next3", "Next",
-                                 #                     style = "width:100%; font-size:200%"))
                                  )
                                
                                
