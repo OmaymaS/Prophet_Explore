@@ -36,34 +36,13 @@ ui <- dashboardPage(
       tabItem(tabName = "About",
               fluidRow(
                 box(width = 12,
-                tags$h1("About"),
-                helpText(tags$a(href="https://github.com/OmaymaS/Prophet_Explore","Prophet Explore "),
-                         HTML("is a Shiny App that offers an interactive interface to explore the main functions of the "),
-                         tags$a(href='https://facebookincubator.github.io/prophet/',"[prophet Package]"),
-                         HTML("; an open source software released by Facebook's Core Data Science team."),
-                         tags$br(),
-                         tags$br(),
-                         HTML("<b>To explore</b>: 
-                              <ul> 
-                              <li>Upload your data in the right format <i>(dataframe with at least two columns 'ts' & 'y')</i></li>
-                              <li>Tune the parameters</li>
-                              <li>Press 'Fit Prophet Model'</li>
-                              </ul>.")),
+                ## include about text as html --------------------
+                includeHTML("./www/about.html"),
+                
                 ## go to the app ---------------------
                 a("Get Started!", onclick = "openTab('Prophet')",
                   style="cursor: pointer; font-size: 300%;")
                 )
-                
-                # infoBox(
-                #   tags$p("Get Started",
-                #          style = "font-size: 150%"),
-                #   a("Start", onclick = "openTab('Prophet')",
-                #     style="cursor: pointer; font-size: 100%;"),
-                #   icon=icon("keyboard-o"),
-                #   color="aqua",
-                #   width = 6,
-                #   fill=T
-                # )
               )
               ),
       tabItem(tabName = "Prophet",
