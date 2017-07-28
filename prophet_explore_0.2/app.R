@@ -49,6 +49,7 @@ ui <- dashboardPage(
                               <li>Tune the parameters</li>
                               <li>Press 'Fit Prophet Model'</li>
                               </ul>.")),
+                ## go to the app ---------------------
                 a("Get Started!", onclick = "openTab('Prophet')",
                   style="cursor: pointer; font-size: 300%;")
                 )
@@ -71,6 +72,11 @@ ui <- dashboardPage(
                     tabsetPanel(id = "inTabset",
                                 ## TAB 1 -------------
                                 tabPanel(title = "Upload Data", value = "panel1",
+                                         # valueBox(value = "Upload Data",
+                                         #          subtitle = "",
+                                         #          width = 12
+                                         # ),
+                                         
                                          fluidRow(br()),
                                          fluidRow(
                                            ## upload main dataset -----------------
@@ -83,6 +89,8 @@ ui <- dashboardPage(
                                                                      "text/comma-separated-values,text/plain",
                                                                      ".csv"))),
                                                   column(width = 12,
+                                                         conditionalPanel(condition = 'output.panelStatus',
+                                                                          tags$p("First 6 rows of the uploaded data")),
                                                          tableOutput("uploaded_data")),
                                                   column(width = 12,
                                                          uiOutput("msg"))
@@ -295,11 +303,19 @@ server <- function(input, output, session) {
       shinyjs::enable("next1")
   })
   
-  ##
+  ## table of 1st 6 rows of uploaded data ------------------
   output$uploaded_data <- renderTable({
     req(dat)
     head(dat())
+    
   })
+  
+  ## panel status ------------------------
+  output$panelStatus <- reactive({
+    nrow(dat())>0
+  })
+  
+  outputOptions(output, "panelStatus", suspendWhenHidden = FALSE)
   
   ## Toggle submit button state according to data ---------------
   observe({
