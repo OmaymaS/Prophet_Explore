@@ -59,23 +59,26 @@ ui <- dashboardPage(
                                          fluidRow(
                                            ## upload main dataset -----------------
                                            column(width = 6,
-                                                  column(width = 12,
+                                                  # column(width = 12,
                                                          tags$h4("Main Dataset"),
                                                          fileInput("ts_file","Upload CSV File",
                                                                    accept = c(
                                                                      "text/csv",
                                                                      "text/comma-separated-values,text/plain",
-                                                                     ".csv"))),
+                                                                     ".csv")),
+                                                         # ),
                                                   
                                                   ### first rows of the uploaded data
-                                                  column(width = 12,
+                                                  # column(width = 12,
                                                          conditionalPanel(condition = 'output.panelStatus',
                                                                           helpText("First 6 rows of the uploaded data")),
-                                                         tableOutput("uploaded_data")),
+                                                         tableOutput("uploaded_data"),
+                                                         # ),
                                                   
                                                   ### error msg if main dataset is not valid 
-                                                  column(width = 12,
-                                                         uiOutput("msg"))
+                                                  # column(width = 12,
+                                                         uiOutput("msg")
+                                                         # )
                                            ),
                                            ## upload holidays -----------------
                                            column(width = 6,
@@ -85,7 +88,14 @@ ui <- dashboardPage(
                                                                    accept = c(
                                                                      "text/csv",
                                                                      "text/comma-separated-values,text/plain",
-                                                                     ".csv"))))
+                                                                     ".csv")))),
+                                           # column(width = 12,
+                                                  conditionalPanel(condition = 'output.panelStatus_holidays',
+                                                                   helpText("First 6 rows of the uploaded holidays "),
+                                                                   # ),
+                                                  
+                                                  tableOutput("uploaded_holidays"))
+                                           
                                            
                                          ),
                                          ## Next 1 ---------------
@@ -270,12 +280,6 @@ server <- function(input, output, session) {
     read.csv(file_in$datapath, header = T)     # read csv
   })
   
-  ## get holidays -------------
-  holidays_upload <- reactive({
-    if(is.null(input$holidays_file)) h <- NULL
-    else h <- read.csv(input$holidays_file$datapath, header = T) 
-    return(h)
-  })
   
   ## Toggle submit button state according to data ---------------
   observe({
@@ -299,6 +303,14 @@ server <- function(input, output, session) {
   
   outputOptions(output, "panelStatus", suspendWhenHidden = FALSE)
   
+  
+  ## get holidays -------------
+  holidays_upload <- reactive({
+    if(is.null(input$holidays_file)) h <- NULL
+    else h <- read.csv(input$holidays_file$datapath, header = T) 
+    return(h)
+  })
+  
   ## table of 1st 6 rows of uploaded holidays ------------------
   output$uploaded_holidays <- renderTable({
     req(holidays_upload)
@@ -307,7 +319,7 @@ server <- function(input, output, session) {
   
   ## panel status ------------------------
   output$panelStatus_holidays <- reactive({
-    nrow(holidays_upload())>0
+    !(is.null(holidays_upload()))
   })
   
   outputOptions(output, "panelStatus_holidays", suspendWhenHidden = FALSE)
