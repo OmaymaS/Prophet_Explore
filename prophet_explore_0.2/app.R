@@ -1,3 +1,4 @@
+# load libraries
 library(DT)
 library(shiny)
 library(shinydashboard)
@@ -87,27 +88,21 @@ ui <- dashboardPage(
                                                               ".csv")),
                                                   conditionalPanel(condition = 'output.panelStatus_holidays',
                                                                    helpText("First 6 rows of the uploaded holidays ")),
-                                                  tableOutput("uploaded_holidays"),
+                                                  tableOutput("uploaded_holidays")
                                                   
                                                   ### error msg if holidays is not valid 
-                                                  uiOutput("msg_holidays")
-                                                  
-                                                  
+                                                  # uiOutput("msg_holidays")
                                            )
                                          ),
                                          ## Next 1 ---------------
                                          fluidRow(
-                                           # box(width = 12,
                                            column(width = 2, offset = 10,
                                                   shinyjs::disabled(actionButton("next1", "Next",
                                                                                  style = "width:100%; font-size:200%"))))
-                                         # )
                                 ),
-                                ## TAB 2 -------------
+                                ## TAB 2 : Set Parameters -----------------------------------
                                 tabPanel(title = "Set Parameters", value = "panel2",
                                          fluidRow(
-                                           # box(width = 12,
-                                           ## prophet parameters --------------------
                                            column(width = 8,
                                                   column(width = 8, offset = 2,
                                                          tags$h3("Prophet Parameters")),
@@ -145,18 +140,14 @@ ui <- dashboardPage(
                                            ),
                                            ## predict parameters --------------------
                                            column(width = 4,
-                                                  column(width = 12,
-                                                         tags$h3("Predict Parameters")),
-                                                  column(width = 12,
-                                                         ### paramater: periods
-                                                         numericInput("periods","periods",value=365),
-                                                         
-                                                         ### parameter: freq
-                                                         selectInput("freq","freq",
-                                                                     choices = c('day', 'week', 'month', 'quarter','year')),
-                                                         
-                                                         ### parameter: include_history
-                                                         checkboxInput("include_history","include_history", value = TRUE))
+                                                  tags$h3("Predict Parameters"),
+                                                  ### paramater: periods
+                                                  numericInput("periods","periods",value=365),
+                                                  ### parameter: freq
+                                                  selectInput("freq","freq",
+                                                              choices = c('day', 'week', 'month', 'quarter','year')),
+                                                  ### parameter: include_history
+                                                  checkboxInput("include_history","include_history", value = TRUE)
                                            )
                                          )
                                          ,
@@ -170,7 +161,7 @@ ui <- dashboardPage(
                                                                style = "width:100%; font-size:200%"))
                                          )
                                 ),
-                                ## TAB 3 -------------
+                                ## TAB 3 : Fit Propher Model ----------------------
                                 tabPanel(title = "Fit Model", value = "panel3", 
                                          fluidRow(
                                            # box(width = 12, 
@@ -180,7 +171,8 @@ ui <- dashboardPage(
                                                   )
                                            )
                                          ),
-                                         # column(width = 12, HTML("<br><br>")),
+                                         
+                                         ## Results Box : collapsible ------------------
                                          fluidRow(
                                            box(width = 12, collapsible = T, title = "Results",
                                                conditionalPanel("input.plot_btn2",
@@ -193,6 +185,7 @@ ui <- dashboardPage(
                                                )
                                            )
                                          ),
+                                         ## Plots Box : collapsible ------------------
                                          fluidRow( 
                                            box(width = 12, collapsible = T, title = "Plots",
                                                tabsetPanel(
@@ -215,16 +208,14 @@ ui <- dashboardPage(
                                                                                plotOutput("prophet_comp_plot"))
                                                           )
                                                  )
-                                               )))
-                                         ,
-                                         
+                                               ))),
+                                         ## back 3 ------------
                                          fluidRow(
                                            column(width = 2, 
                                                   actionButton("back3", "Back",
                                                                style = "width:100%; font-size:200%"))
                                          )
                                 )
-                                
                     )
                 )
                 
@@ -235,6 +226,7 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   addClass(selector = "body", class = "sidebar-collapse")
   
+  ## Next/Back Buttons actions (to be turned into modules)---------------------------
   observeEvent(input$next1, {
     updateTabsetPanel(session, "inTabset",
                       selected = "panel2")
@@ -263,22 +255,20 @@ server <- function(input, output, session) {
   ## function: duplicatedRecative values -----------------------------
   duplicatedRecative <- function(signal){
     values <- reactiveValues(val="")
-    
     observe({
       values$val <- signal()
     })
     reactive(values$val)
   }
   
-  ## read csv file data----------
+  ## read csv file main data------------------------------------------------
   dat <- reactive({
     req(input$ts_file)
     file_in <- input$ts_file
     read.csv(file_in$datapath, header = T)     # read csv
   })
-  
-  
-  ## Toggle submit button state according to data ---------------
+
+  ## Toggle submit button state according to main data -----------------------
   observe({
     if(!(c("ds","y") %in% names(dat()) %>% mean ==1))
       shinyjs::disable("next1")
@@ -286,35 +276,33 @@ server <- function(input, output, session) {
       shinyjs::enable("next1")
   })
   
-  ## table of 1st 6 rows of uploaded data ------------------
+  ## output: table of 1st 6 rows of uploaded main data ------------------
   output$uploaded_data <- renderTable({
     req(dat)
     head(dat())
-    
   })
   
-  ## panel status ------------------------
+  ## panel status depending on main data ------------------------
   output$panelStatus <- reactive({
     nrow(dat())>0
   })
   
   outputOptions(output, "panelStatus", suspendWhenHidden = FALSE)
   
-  
-  ## get holidays -------------
+  ## read csv file of holidays ---------------------------------
   holidays_upload <- reactive({
     if(is.null(input$holidays_file)) h <- NULL
     else h <- read.csv(input$holidays_file$datapath, header = T) 
     return(h)
   })
   
-  ## table of 1st 6 rows of uploaded holidays ------------------
+  ## output: table of 1st 6 rows of uploaded holidays ------------------
   output$uploaded_holidays <- renderTable({
-    # req(holidays_upload)
-    holidays_upload()
+    req(holidays_upload)
+    head(holidays_upload())
   })
   
-  ## panel status ------------------------
+  ## panel status depending on holidays ------------------------
   output$panelStatus_holidays <- reactive({
     !(is.null(holidays_upload()))
   })
@@ -329,8 +317,7 @@ server <- function(input, output, session) {
       shinyjs::enable("plot_btn2")
   })
   
-  
-  
+
   ## logistic_check -------------------
   logistic_check <- eventReactive(input$plot_btn2, {
     # req(dat())
@@ -342,7 +329,7 @@ server <- function(input, output, session) {
       return("no_error")
   })
   
-  ## create prophet model -----------
+  ## create prophet model --------------------------------------------------
   prophet_model <- eventReactive(input$plot_btn2,{
     
     req(dat(), 
@@ -384,7 +371,7 @@ server <- function(input, output, session) {
   })
   
   
-  ## dup reactive --------------
+  ## dup reactive prophet_model ------------------------------
   p_model <- duplicatedRecative(prophet_model)
   
   ## Make dataframe with future dates for forecasting -------------
@@ -396,7 +383,7 @@ server <- function(input, output, session) {
                           include_history = input$include_history)
   })
   
-  ## dup reactive --------------
+  ## dup reactive future--------------------------
   p_future <- duplicatedRecative(future)
   
   ## predict future values -----------------------
@@ -405,14 +392,15 @@ server <- function(input, output, session) {
     predict(prophet_model(),p_future())
   })
   
-  ## dup reactive --------------
+  ## dup reactive forecast--------------------------
   p_forecast <- duplicatedRecative(forecast)
-  output$uploaded_data2 <- renderPrint({
-    req(prophet_model())
-    # prophet_model()
-  })
   
-  ## create datatable from forecast dataframe --------------------
+  # output$uploaded_data2 <- renderPrint({
+  #   req(prophet_model())
+  #   # prophet_model()
+  # })
+  
+  ## output :  datatable from forecast dataframe --------------------
   output$data <- renderDataTable({
     # req(logistic_check()!="error")
     DT::datatable(forecast(), 
@@ -422,7 +410,6 @@ server <- function(input, output, session) {
   
   ## download button ----------------
   output$dw_button <- renderUI({
-    
     req(forecast())
     downloadButton('downloadData', 'Download Data',
                    style = "width:20%;
@@ -437,22 +424,22 @@ server <- function(input, output, session) {
     }
   )
   ## Toggle submit button state according to data ---------------
-  observe({
-    # if(nrow(forecast() == 0))
-    #   shinyjs::disable("plot_btn3")
-    # else 
-    if(nrow(forecast() > 0))
-      shinyjs::enable("plot_btn3")
-  })
-  
-  ## plot forecast -------------
+  # observe({
+  #   # if(nrow(forecast() == 0))
+  #   #   shinyjs::disable("plot_btn3")
+  #   # else 
+  #   if(nrow(forecast() > 0))
+  #     shinyjs::enable("plot_btn3")
+  # })
+  # 
+  ## output:  plot forecast -------------
   output$ts_plot <- renderPlot({
     # req(logistic_check()!="error")
     g <- plot(p_model(), forecast())
     g+theme_classic()
   })
   
-  ## plot prophet components --------------
+  ## output:plot prophet components --------------
   output$prophet_comp_plot <- renderPlot({
     # req(logistic_check()!="error")
     prophet_plot_components(p_model(), forecast())
@@ -466,7 +453,6 @@ server <- function(input, output, session) {
   
   ## error msg for holidays ------------------------
   output$msg_holidays <- renderUI({
-    
     if(c("ds","holiday") %in% names(holidays_upload()) %>% mean !=1)
       "Invalid Input: dataframe should have at least two columns named (ds & holiday)"
   })
