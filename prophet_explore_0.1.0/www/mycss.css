@@ -18,3 +18,8 @@ z-index: -2;
 #ts_plot.recalculating{
   z-index: -2;
 }
+
+#btn {
+width:100%;
+font-size:200%
+}
