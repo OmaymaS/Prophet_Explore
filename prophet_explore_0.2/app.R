@@ -10,6 +10,7 @@ library(ggplot2)
 ui <- dashboardPage(
   dashboardHeader(title = "Prophet Explorer"),
   
+  ## Sidebar ------------------------------------
   dashboardSidebar(
     sidebarMenu(
       menuItem("About", tabName = "About"),
@@ -17,10 +18,11 @@ ui <- dashboardPage(
     )
   ),
   
+  ## Body ------------------------------------
   dashboardBody(
-    ## include css file --------------------
+    ### include css file --------------------
     tags$head(tags$style(includeCSS("./www/mycss.css"))),
-    ## include script ----------------------
+    ### include script with function openTab----------------------
     tags$script(HTML("var openTab = function(tabName){$('a', $('.sidebar')).each(function() {
                      if(this.getAttribute('data-value') == tabName) {
                      this.click()
@@ -28,35 +30,32 @@ ui <- dashboardPage(
                      });
                      }
                      ")),
-    
-    ## use shinyjs -----------------------
+    ### use shinyjs -----------------------
     useShinyjs(),
+    
     ## Tab Items ---------------------------
     tabItems(
+      ### ABout ----------------------------
       tabItem(tabName = "About",
               fluidRow(
                 box(width = 12,
-                ## include about text as html --------------------
-                includeHTML("./www/about.html"),
-                
-                ## go to the app ---------------------
-                a("Get Started!", onclick = "openTab('Prophet')",
-                  style="cursor: pointer; font-size: 300%;")
+                    ## include about text as html --------------------
+                    includeHTML("./www/about.html"),
+                    
+                    ## go to the app ---------------------
+                    a("Get Started!", onclick = "openTab('Prophet')",
+                      style="cursor: pointer; font-size: 300%;")
                 )
               )
-              ),
+      ),
+      ### Prophet ----------------------------
       tabItem(tabName = "Prophet",
               fluidRow(
                 box(width = 12,
                     tabsetPanel(id = "inTabset",
-                                ## TAB 1 -------------
+                                ## TAB 1 : Upload Data --------------------------
                                 tabPanel(title = "Upload Data", value = "panel1",
-                                         # valueBox(value = "Upload Data",
-                                         #          subtitle = "",
-                                         #          width = 12
-                                         # ),
-                                         
-                                         fluidRow(br()),
+                                        
                                          fluidRow(
                                            ## upload main dataset -----------------
                                            column(width = 6,
@@ -67,10 +66,14 @@ ui <- dashboardPage(
                                                                      "text/csv",
                                                                      "text/comma-separated-values,text/plain",
                                                                      ".csv"))),
+                                                  
+                                                  ### first rows of the uploaded data
                                                   column(width = 12,
                                                          conditionalPanel(condition = 'output.panelStatus',
-                                                                          tags$p("First 6 rows of the uploaded data")),
+                                                                          helpText("First 6 rows of the uploaded data")),
                                                          tableOutput("uploaded_data")),
+                                                  
+                                                  ### error msg if main dataset is not valid 
                                                   column(width = 12,
                                                          uiOutput("msg"))
                                            ),
@@ -295,6 +298,19 @@ server <- function(input, output, session) {
   })
   
   outputOptions(output, "panelStatus", suspendWhenHidden = FALSE)
+  
+  ## table of 1st 6 rows of uploaded holidays ------------------
+  output$uploaded_holidays <- renderTable({
+    req(holidays_upload)
+    head(holidays_upload())
+  })
+  
+  ## panel status ------------------------
+  output$panelStatus_holidays <- reactive({
+    nrow(holidays_upload())>0
+  })
+  
+  outputOptions(output, "panelStatus_holidays", suspendWhenHidden = FALSE)
   
   ## Toggle submit button state according to data ---------------
   observe({
