@@ -55,48 +55,45 @@ ui <- dashboardPage(
                     tabsetPanel(id = "inTabset",
                                 ## TAB 1 : Upload Data --------------------------
                                 tabPanel(title = "Upload Data", value = "panel1",
-                                        
+                                         
                                          fluidRow(
                                            ## upload main dataset -----------------
                                            column(width = 6,
                                                   # column(width = 12,
-                                                         tags$h4("Main Dataset"),
-                                                         fileInput("ts_file","Upload CSV File",
-                                                                   accept = c(
-                                                                     "text/csv",
-                                                                     "text/comma-separated-values,text/plain",
-                                                                     ".csv")),
-                                                         # ),
+                                                  tags$h4("Main Dataset"),
+                                                  fileInput("ts_file","Upload CSV File",
+                                                            accept = c(
+                                                              "text/csv",
+                                                              "text/comma-separated-values,text/plain",
+                                                              ".csv")),
                                                   
-                                                  ### first rows of the uploaded data
-                                                  # column(width = 12,
-                                                         conditionalPanel(condition = 'output.panelStatus',
-                                                                          helpText("First 6 rows of the uploaded data")),
-                                                         tableOutput("uploaded_data"),
-                                                         # ),
+                                                  conditionalPanel(condition = 'output.panelStatus',
+                                                                   helpText("First 6 rows of the uploaded data")),
+                                                  
+                                                  tableOutput("uploaded_data"),
                                                   
                                                   ### error msg if main dataset is not valid 
-                                                  # column(width = 12,
-                                                         uiOutput("msg")
-                                                         # )
+                                                  uiOutput("msg_main_data")
+                                                  
                                            ),
                                            ## upload holidays -----------------
                                            column(width = 6,
-                                                  column(width = 12,
-                                                         tags$h4("Holidays (Optional)"),
-                                                         fileInput("holidays_file","Upload CSV File",
-                                                                   accept = c(
-                                                                     "text/csv",
-                                                                     "text/comma-separated-values,text/plain",
-                                                                     ".csv")))),
-                                           # column(width = 12,
-                                                  conditionalPanel(condition = 'output.panelStatus_holidays',
-                                                                   helpText("First 6 rows of the uploaded holidays "),
-                                                                   # ),
                                                   
-                                                  tableOutput("uploaded_holidays"))
-                                           
-                                           
+                                                  tags$h4("Holidays (Optional)"),
+                                                  fileInput("holidays_file","Upload CSV File",
+                                                            accept = c(
+                                                              "text/csv",
+                                                              "text/comma-separated-values,text/plain",
+                                                              ".csv")),
+                                                  conditionalPanel(condition = 'output.panelStatus_holidays',
+                                                                   helpText("First 6 rows of the uploaded holidays ")),
+                                                  tableOutput("uploaded_holidays"),
+                                                  
+                                                  ### error msg if holidays is not valid 
+                                                  uiOutput("msg_holidays")
+                                                  
+                                                  
+                                           )
                                          ),
                                          ## Next 1 ---------------
                                          fluidRow(
@@ -313,8 +310,8 @@ server <- function(input, output, session) {
   
   ## table of 1st 6 rows of uploaded holidays ------------------
   output$uploaded_holidays <- renderTable({
-    req(holidays_upload)
-    head(holidays_upload())
+    # req(holidays_upload)
+    holidays_upload()
   })
   
   ## panel status ------------------------
@@ -461,10 +458,17 @@ server <- function(input, output, session) {
     prophet_plot_components(p_model(), forecast())
   })
   
-  ## error msg ------------------------
-  output$msg <- renderUI({
+  ## error msg for main dataset------------------------
+  output$msg_main_data <- renderUI({
     if(c("ds","y") %in% names(dat()) %>% mean !=1)
       "Invalid Input: dataframe should have at least two columns named (ds & y)"
+  })
+  
+  ## error msg for holidays ------------------------
+  output$msg_holidays <- renderUI({
+    
+    if(c("ds","holiday") %in% names(holidays_upload()) %>% mean !=1)
+      "Invalid Input: dataframe should have at least two columns named (ds & holiday)"
   })
   
 }
