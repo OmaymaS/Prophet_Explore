@@ -62,11 +62,13 @@ ui <- dashboardPage(
                                            column(width = 6,
                                                   # column(width = 12,
                                                   tags$h4("Main Dataset"),
+                                                  helpText("A valid dataframe contains at least 2 colums (ds, y)"),
                                                   fileInput("ts_file","Upload CSV File",
                                                             accept = c(
                                                               "text/csv",
                                                               "text/comma-separated-values,text/plain",
                                                               ".csv")),
+                                                  
                                                   
                                                   conditionalPanel(condition = 'output.panelStatus',
                                                                    helpText("First 6 rows of the uploaded data")),
@@ -81,6 +83,7 @@ ui <- dashboardPage(
                                            column(width = 6,
                                                   
                                                   tags$h4("Holidays (Optional)"),
+                                                  helpText("A valid dataframe contains at least 2 colums (ds, holiday)"),
                                                   fileInput("holidays_file","Upload CSV File",
                                                             accept = c(
                                                               "text/csv",
@@ -319,15 +322,15 @@ server <- function(input, output, session) {
   
 
   ## logistic_check -------------------
-  logistic_check <- eventReactive(input$plot_btn2, {
-    # req(dat())
-    if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
-    {
-      return("error")
-    }
-    else 
-      return("no_error")
-  })
+  # logistic_check <- eventReactive(input$plot_btn2, {
+  #   # req(dat())
+  #   if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
+  #   {
+  #     return("error")
+  #   }
+  #   else 
+  #     return("no_error")
+  # })
   
   ## create prophet model --------------------------------------------------
   prophet_model <- eventReactive(input$plot_btn2,{
