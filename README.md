@@ -5,16 +5,9 @@
 
 ## Versions
 
-- The first version exists in directory [prophet_explore_0.1.0](https://github.com/OmaymaS/Prophet_Explore/tree/master/prophet_explore_0.1.0)
-and deployed [Here](https://omaymas.shinyapps.io/prophet_explore0/).
-
 - The latest version exists in directory [prophet_explore](https://github.com/OmaymaS/Prophet_Explore/tree/master/prophet_explore) and deployed [Here](https://omaymas.shinyapps.io/prophet_explore/)
 
 
 ![](./images/prophet_gif.gif)
 
 
-## prophet Version Used
-
-prophet's version used is the one on Github. 
-To install use: *devtools::install_github('facebookincubator/prophet', subdir='R')*
