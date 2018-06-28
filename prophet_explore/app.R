@@ -15,7 +15,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem("About", tabName = "About"),
-      menuItem("Prophet Explorer App", tabName = "Prophet")
+      menuItem("Prophet Explorer", tabName = "Prophet")
     )
   ),
   
@@ -39,14 +39,19 @@ ui <- dashboardPage(
       ### ABout ----------------------------
       tabItem(tabName = "About",
               fluidRow(
-                box(width = 12,
-                    ## include about text as html --------------------
-                    includeHTML("./www/about.html"),
+                box(width=12,
+                    infoBox(width = 12,
+                            title = "",
+                            value = includeHTML("./www/about.html"),
+                            icon = icon("info")),
                     
-                    ## go to the app ---------------------
-                    a("Get Started!", onclick = "openTab('Prophet')",
-                      style="cursor: pointer; font-size: 300%;")
-                )
+                    column(width = 3,
+                           a(actionButton(inputId = "start",
+                                          label = "Get Started",
+                                          style = "font-size: 150%'"),
+                             onclick = "openTab('Prophet')",
+                             style="cursor: pointer; font-size: 300%;")))
+                
               )
       ),
       ### Prophet ----------------------------
@@ -175,41 +180,43 @@ ui <- dashboardPage(
                                          
                                          ## Results Box : collapsible ------------------
                                          fluidRow(
-                                           box(width = 12, collapsible = T, title = "Results",
-                                               conditionalPanel("input.plot_btn2",
+                                           conditionalPanel("input.plot_btn2",
+                                                            box(width = 12, collapsible = T, title = "Results",
+                                                                
                                                                 div(id = "output-container3",
                                                                     tags$img(src = "spinner.gif",
                                                                              id = "loading-spinner"),
-                                                                    DT::dataTableOutput("data"))),
-                                               conditionalPanel("output.data",
-                                                                uiOutput("dw_button")
-                                               )
-                                           )
-                                         ),
+                                                                    DT::dataTableOutput("data")),
+                                                                conditionalPanel("output.data",
+                                                                                 uiOutput("dw_button")
+                                                                )
+                                                            )
+                                           )),
                                          ## Plots Box : collapsible ------------------
                                          fluidRow( 
-                                           box(width = 12, collapsible = T, title = "Plots",
-                                               tabsetPanel(
-                                                 tabPanel("Forecast Plot",
-                                                          conditionalPanel("input.plot_btn2",
+                                           conditionalPanel("input.plot_btn2",
+                                                            box(width = 12, collapsible = T, title = "Plots",
+                                                                tabsetPanel(
+                                                                  tabPanel("Forecast Plot",
+                                                                           
                                                                            div(id = "output-container",
                                                                                # tags$img(src = "spinner.gif",
                                                                                #          id = "loading-spinner"),
                                                                                plotOutput("ts_plot")
                                                                            )
-                                                          )
-                                                          
-                                                 ),
-                                                 tabPanel("Prophet Plot Components",
-                                                          # output.logistic_check=='no_error'
-                                                          conditionalPanel("input.plot_btn2",
-                                                                           div(id = "output-container",
-                                                                               # tags$img(src = "spinner.gif",
-                                                                               #          id = "loading-spinner"),
-                                                                               plotOutput("prophet_comp_plot"))
-                                                          )
-                                                 )
-                                               ))),
+                                                                           # )
+                                                                           
+                                                                  ),
+                                                                  tabPanel("Prophet Plot Components",
+                                                                           # output.logistic_check=='no_error'
+                                                                           conditionalPanel("input.plot_btn2",
+                                                                                            div(id = "output-container",
+                                                                                                # tags$img(src = "spinner.gif",
+                                                                                                #          id = "loading-spinner"),
+                                                                                                plotOutput("prophet_comp_plot"))
+                                                                           )
+                                                                  )
+                                                                )))),
                                          ## back 3 ------------
                                          fluidRow(
                                            column(width = 2, 
@@ -221,8 +228,8 @@ ui <- dashboardPage(
                 )
                 
               )))
-    )
   )
+)
 
 server <- function(input, output, session) {
   addClass(selector = "body", class = "sidebar-collapse")
@@ -458,6 +465,6 @@ server <- function(input, output, session) {
       "Invalid Input: dataframe should have at least two columns named (ds & holiday)"
   })
   
-  }
+}
 
 shinyApp(ui, server)
