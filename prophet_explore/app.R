@@ -325,18 +325,6 @@ server <- function(input, output, session) {
       shinyjs::enable("plot_btn2")
   })
   
-  
-  ## logistic_check -------------------
-  # logistic_check <- eventReactive(input$plot_btn2, {
-  #   # req(dat())
-  #   if( (input$growth == "logistic") & !("cap" %in% names(dat())) )
-  #   {
-  #     return("error")
-  #   }
-  #   else 
-  #     return("no_error")
-  # })
-  
   ## create prophet model --------------------------------------------------
   prophet_model <- eventReactive(input$plot_btn2,{
     
@@ -374,10 +362,7 @@ server <- function(input, output, session) {
                   fit = T)
     
     return(kk)
-    # print(head(kk))
-    
   })
-  
   
   ## dup reactive prophet_model ------------------------------
   p_model <- duplicatedRecative(prophet_model)
@@ -402,12 +387,7 @@ server <- function(input, output, session) {
   
   ## dup reactive forecast--------------------------
   p_forecast <- duplicatedRecative(forecast)
-  
-  # output$uploaded_data2 <- renderPrint({
-  #   req(prophet_model())
-  #   # prophet_model()
-  # })
-  
+
   ## output :  datatable from forecast dataframe --------------------
   output$data <- renderDataTable({
     # req(logistic_check()!="error")
@@ -431,15 +411,7 @@ server <- function(input, output, session) {
       write.csv(forecast(), file)
     }
   )
-  ## Toggle submit button state according to data ---------------
-  # observe({
-  #   # if(nrow(forecast() == 0))
-  #   #   shinyjs::disable("plot_btn3")
-  #   # else 
-  #   if(nrow(forecast() > 0))
-  #     shinyjs::enable("plot_btn3")
-  # })
-  # 
+  
   ## output:  plot forecast -------------
   output$ts_plot <- renderPlot({
     # req(logistic_check()!="error")
